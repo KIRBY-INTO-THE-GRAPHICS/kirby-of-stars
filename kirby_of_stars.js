@@ -270,12 +270,6 @@ const keys = {
   },
   d: {
     pressed: false
-  },
-  s: {
-    pressed: false
-  },
-  w: {
-    pressed: false
   }
 }
 
@@ -286,12 +280,6 @@ window.addEventListener('keydown', (event) => {
       break
     case 'KeyD':
       keys.d.pressed = true
-      break
-    case 'KeyS':
-      keys.s.pressed = true
-      break
-    case 'KeyW':
-      keys.w.pressed = true
       break
     case 'Space':
       cube.velocity.y = 0.08
@@ -306,12 +294,6 @@ window.addEventListener('keyup', (event) => {
       break
     case 'KeyD':
       keys.d.pressed = false
-      break
-    case 'KeyS':
-      keys.s.pressed = false
-      break
-    case 'KeyW':
-      keys.w.pressed = false
       break
   }
 })
@@ -346,9 +328,6 @@ function animate() {
   cube.velocity.z = 0
   if (keys.a.pressed) cube.velocity.x = -0.05
   else if (keys.d.pressed) cube.velocity.x = 0.05
-
-  if (keys.s.pressed) cube.velocity.z = 0.05
-  else if (keys.w.pressed) cube.velocity.z = -0.05
 
   cube.update(ground)
   enemies.forEach((enemy) => {
