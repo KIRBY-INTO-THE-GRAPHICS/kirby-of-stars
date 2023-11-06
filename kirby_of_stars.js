@@ -303,7 +303,7 @@ const enemies = []
 
 // 애니메이션 설정 부분
 let frames = 0
-let spawnRate = 200
+let spawnRate = 100
 let grassSpeed = 0.05
 function animate() {
   const animationId = requestAnimationFrame(animate)
@@ -326,6 +326,7 @@ function animate() {
   // 초록 큐브랑 빨간 큐브 설정
   cube.velocity.x = 0
   cube.velocity.z = 0
+
   if (keys.a.pressed) cube.velocity.x = -0.05
   else if (keys.d.pressed) cube.velocity.x = 0.05
 
@@ -343,14 +344,14 @@ function animate() {
   })
 
   if (frames % spawnRate === 0) {
-    if (spawnRate > 20) spawnRate -= 20
+    if (spawnRate > 1) spawnRate -= 0.5
 
     const enemy = new Box({
       width: 1,
       height: 1,
       depth: 1,
       position: {
-        x: (Math.random() - 0.5) * 10,
+        x: (Math.random() - 0.75) * 10,
         y: 0,
         z: -20
       },
@@ -366,5 +367,6 @@ function animate() {
     scene.add(enemy)
     enemies.push(enemy)
   }
+
   frames++
 }
