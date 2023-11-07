@@ -24,87 +24,79 @@ document.body.appendChild(renderer.domElement)
 const controls = new OrbitControls(camera, renderer.domElement)
 
 class Box extends THREE.Mesh {
-  constructor({
-    width,
-    height,
-    depth,
-    color = '#00ff00',
-    velocity = {
-      x: 0,
-      y: 0,
-      z: 0
-    },
-    position = {
-      x: 0,
-      y: 0,
-      z: 0
-    },
-    zAcceleration = false
-  }) {
-    super(
-      new THREE.BoxGeometry(width, height, depth),
-      new THREE.MeshStandardMaterial({ color })
-    )
+   constructor({
+     width,
+     height,
+     depth,
+     color = '#00ff00',
+     opacity = 1.0,
+     transparent = false, 
+     velocity = {
+       x: 0,
+       y: 0,
+       z: 0
+     },
+     position = {
+       x: 0,
+       y: 0,
+       z: 0
+     },
+     zAcceleration = false
+   }) {
+     const material = new THREE.MeshStandardMaterial({ color, opacity, transparent });
+     super(new THREE.BoxGeometry(width, height, depth), material);
+ 
+     this.width = width;
+     this.height = height;
+     this.depth = depth;
+ 
+     this.position.set(position.x, position.y, position.z);
+ 
+     this.velocity = velocity;
+     this.gravity = -0.002;
+ 
+     this.zAcceleration = zAcceleration;
+ 
+     this.updateSides();
+   }
+ 
+   updateSides() {
+     this.right = this.position.x + this.width / 2;
+     this.left = this.position.x - this.width / 2;
+     
+     this.bottom = this.position.y - this.height / 2;
+     this.top = this.position.y + this.height / 2;
+     
+     this.front = this.position.z + this.depth / 2;
+     this.back = this.position.z - this.depth / 2;
+   }
+ 
+   update(ground) {
+     this.updateSides();
+     
+     if (this.zAcceleration) this.velocity.z += 0.0003;
+     
+     this.position.x += this.velocity.x;
+     this.position.z += this.velocity.z;
+     
+     this.applyGravity(ground);
+   }
+ 
+   applyGravity(ground) {
+     this.velocity.y += this.gravity;
 
-    this.width = width
-    this.height = height
-    this.depth = depth
-
-    this.position.set(position.x, position.y, position.z)
-
-    this.right = this.position.x + this.width / 2
-    this.left = this.position.x - this.width / 2
-
-    this.bottom = this.position.y - this.height / 2
-    this.top = this.position.y + this.height / 2
-
-    this.front = this.position.z + this.depth / 2
-    this.back = this.position.z - this.depth / 2
-
-    this.velocity = velocity
-    this.gravity = -0.002
-
-    this.zAcceleration = zAcceleration
-  }
-
-  updateSides() {
-    this.right = this.position.x + this.width / 2
-    this.left = this.position.x - this.width / 2
-
-    this.bottom = this.position.y - this.height / 2
-    this.top = this.position.y + this.height / 2
-
-    this.front = this.position.z + this.depth / 2
-    this.back = this.position.z - this.depth / 2
-  }
-
-  update(ground) {
-    this.updateSides()
-
-    if (this.zAcceleration) this.velocity.z += 0.0003
-
-    this.position.x += this.velocity.x
-    this.position.z += this.velocity.z
-
-    this.applyGravity(ground)
-  }
-
-  applyGravity(ground) {
-    this.velocity.y += this.gravity
-
-    // this is where we hit the ground
-    if (
-      boxCollision({
-        box1: this,
-        box2: ground
-      })
-    ) {
-      const friction = 0.5
-      this.velocity.y *= friction
-      this.velocity.y = -this.velocity.y
-    } else this.position.y += this.velocity.y
-  }
-}
+     if (boxCollision({
+       box1: this,
+       box2: ground
+     })) {
+       const friction = 0.5;
+       this.velocity.y *= -friction;
+     } else {
+       this.position.y += this.velocity.y;
+     }
+   }
+ }
+ 
 
 // 배경 - 하늘
 function addSky() {
@@ -151,18 +143,36 @@ function boxCollision({ box1, box2 }) {
   return xCollision && yCollision && zCollision
 }
 
-const cube = new Box({
-  width: 1,
-  height: 1,
-  depth: 1,
-  velocity: {
-    x: 0,
-    y: -0.01,
-    z: 0
-  }
-})
-cube.castShadow = true
-scene.add(cube)
+// 플레이어(커비)
+let playerModel
+// GLTF 모델을 로드하는 함수
+function loadKirbyModel() {
+   const loader = new GLTFLoader();
+   loader.load('assets/kirby/kirby.glb', (gltf) => {
+     playerModel = gltf.scene;
+     playerModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
+     playerModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
+     playerModel.rotation.y = Math.PI;
+     playerModel.castShadow = true;
+     scene.add(playerModel);
+     animate(); // 모델 로드 후 애니메이션 시작
+   });
+ }
+
+ const player = new Box({
+   width: 1,
+   height: 1,
+   depth: 1,
+   color: '#FFFFFF',
+   opacity: 0,
+   transparent: true, 
+   velocity: {
+     x: 0,
+     y: -0.01,
+     z: 0
+   }
+ });
+loadKirbyModel();
 
 // 배경 - 바닥
 // 기본 바닥(중력을 위한한)
@@ -261,7 +271,7 @@ scene.add(new THREE.AmbientLight(0xffffff, 1.0))
 
 camera.position.z = 5
 console.log(ground.top)
-console.log(cube.bottom)
+console.log(player.bottom)
 
 // 조작 키 설정
 const keys = {
@@ -269,12 +279,6 @@ const keys = {
     pressed: false
   },
   d: {
-    pressed: false
-  },
-  s: {
-    pressed: false
-  },
-  w: {
     pressed: false
   }
 }
@@ -287,14 +291,8 @@ window.addEventListener('keydown', (event) => {
     case 'KeyD':
       keys.d.pressed = true
       break
-    case 'KeyS':
-      keys.s.pressed = true
-      break
-    case 'KeyW':
-      keys.w.pressed = true
-      break
     case 'Space':
-      cube.velocity.y = 0.08
+      player.velocity.y = 0.08
       break
   }
 })
@@ -307,12 +305,6 @@ window.addEventListener('keyup', (event) => {
     case 'KeyD':
       keys.d.pressed = false
       break
-    case 'KeyS':
-      keys.s.pressed = false
-      break
-    case 'KeyW':
-      keys.w.pressed = false
-      break
   }
 })
 
@@ -321,7 +313,7 @@ const enemies = []
 
 // 애니메이션 설정 부분
 let frames = 0
-let spawnRate = 200
+let spawnRate = 100
 let grassSpeed = 0.05
 function animate() {
   const animationId = requestAnimationFrame(animate)
@@ -341,21 +333,23 @@ function animate() {
     flowerArray[i].position.z += grassSpeed;
   }
   
-  // 초록 큐브랑 빨간 큐브 설정
-  cube.velocity.x = 0
-  cube.velocity.z = 0
-  if (keys.a.pressed) cube.velocity.x = -0.05
-  else if (keys.d.pressed) cube.velocity.x = 0.05
+  // 플레이어 위치 설정
+  player.velocity.x = 0
+  player.velocity.z = 0
 
-  if (keys.s.pressed) cube.velocity.z = 0.05
-  else if (keys.w.pressed) cube.velocity.z = -0.05
+  if (keys.a.pressed) player.velocity.x = -0.05
+  else if (keys.d.pressed) player.velocity.x = 0.05
 
-  cube.update(ground)
+  if (playerModel) {
+   player.update(ground); // 플레이어 물리적 위치 업데이트
+   playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
+   playerModel.rotation.y = Math.PI;
+ }
   enemies.forEach((enemy) => {
     enemy.update(ground)
     if (
       boxCollision({
-        box1: cube,
+        box1: player,
         box2: enemy
       })
     ) {
@@ -364,14 +358,14 @@ function animate() {
   })
 
   if (frames % spawnRate === 0) {
-    if (spawnRate > 20) spawnRate -= 20
+    if (spawnRate > 1) spawnRate -= 0.5
 
     const enemy = new Box({
       width: 1,
       height: 1,
       depth: 1,
       position: {
-        x: (Math.random() - 0.5) * 10,
+        x: (Math.random() - 0.75) * 10,
         y: 0,
         z: -20
       },
@@ -387,5 +381,6 @@ function animate() {
     scene.add(enemy)
     enemies.push(enemy)
   }
+
   frames++
 }
