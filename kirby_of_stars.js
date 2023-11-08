@@ -464,8 +464,8 @@ function animate() {
       depth: 1,
       position: {
         x: (Math.random() - 0.75) * 10,
-        y: 0,
-        z: -20
+        y: -1.5,
+        z: -40
       },
       velocity: {
         x: 0,
