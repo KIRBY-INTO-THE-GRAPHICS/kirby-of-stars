@@ -367,7 +367,7 @@ const enemies = []
 
 // 애니메이션 설정 부분
 let frames = 0
-let spawnRate = 200
+let spawnRate = 100
 function animate() {
   const animationId = requestAnimationFrame(animate)
   renderer.render(scene, camera)
@@ -420,7 +420,6 @@ function animate() {
       flower.position.z = -flowerSpacing * (flower2Array.length - 1);
     }
   }
-
   //cloud
   for (let i = 0; i < cloudArray.length; i++) {
     const cloud = cloudArray[i];
@@ -430,7 +429,7 @@ function animate() {
       cloud.position.x = Math.random() < 0.5 ? -10 - Math.random() * 10 : 4 + Math.random() * 10;
     }
   }
-  
+
   // 플레이어 위치 설정
   player.velocity.x = 0
   player.velocity.z = 0
@@ -443,6 +442,7 @@ function animate() {
    playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
    playerModel.rotation.y = Math.PI;
  }
+  
   enemies.forEach((enemy) => {
     enemy.update(ground)
     if (
