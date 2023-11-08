@@ -404,6 +404,34 @@ function loadDragonflyModel(enemy) {
       enemy.type = 'dragonfly'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
    });
 }
+// 별 아이템 모델을 로드하는 함수
+function loadStarModel(item) {
+   const loader = new GLTFLoader();
+   loader.load('assets/img/star.glb', (gltf) => {
+      const starModel = gltf.scene;
+      starModel.scale.set(0.7, 0.7, 0.7);
+      starModel.position.copy(item.position); 
+      starModel.castShadow = true;
+      scene.add(starModel);
+
+      item.model = starModel; // Box 객체에 모델을 연결합니다.
+      item.type = 'star'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+   });
+}
+// 박스 모델을 로드하는 함수
+function loadBoxModel(enemy) {
+   const loader = new GLTFLoader();
+   loader.load('assets/obstacle/obstacle_box_small.glb', (gltf) => {
+      const boxModel = gltf.scene;
+      boxModel.scale.set(0.7, 0.7, 0.7);
+      boxModel.position.copy(enemy.position); 
+      boxModel.castShadow = true;
+      scene.add(boxModel);
+
+      enemy.model = boxModel; // Box 객체에 모델을 연결합니다.
+      enemy.type = 'box'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+   });
+}
 
 // 애니메이션 설정 부분
 let frames = 0
@@ -487,38 +515,7 @@ function animate() {
       if (mixer) mixer.update(delta);
    }
 
-/*   if (frames % spawnRate === 0) {
-      if (spawnRate > 30) spawnRate -= 0.5*/
 
-      loadObstacleObject()
-      if (frames % 5 === 0) loadStarObject()
-   //}
-
-
-   frames++
-}
-
-// 점수 변수
-let score = -100;
-
-// 화면에 점수 업데이트
-function updateScore() {
-   const scoreElement = document.getElementById("score");
-   if (scoreElement) {
-      scoreElement.textContent = `Score: ${score}`;
-   }
-}
-
-// 점수 증가
-function incrementScore() {
-   score += 100
-   updateScore();
-}
-
-// 초기 점수 설정
-updateScore();
-
-function loadObstacleObject() {
    // 장애물 생성
    if (frames % spawnRate === 0) {
       if (spawnRate > 1) spawnRate -= 0.5
@@ -545,10 +542,15 @@ function loadObstacleObject() {
       scene.add(enemy)
       enemies.push(enemy)
 
-      //if(랜덤해서) {
-      // 장애물 모델 여러개중 하나 로드하게 로직짜면 될듯
-      loadDragonflyModel(enemy)
-      //}
+      const rand = Math.random();
+      if (rand < 0.3) {
+        loadStarModel(enemy);
+      } else if (rand < 0.5) {
+        loadDragonflyModel(enemy);
+      } else {
+        loadBoxModel(enemy);
+      }
+      
    }
    enemies.forEach((enemy) => {
       enemy.update(ground)
@@ -570,52 +572,31 @@ function loadObstacleObject() {
          enemy.model.position.copy(enemy.position);
       }
    })
-};
 
-let itemModel; // itemModel 변수 선언
-function loadStarObject() {
-   const loader = new GLTFLoader();
-   // 모델 로드
-   loader.load('assets/img/star.glb', (gltf) => {
-      itemModel = gltf.scene; // 로드한 모델을 itemModel 변수에 할당
-      itemModel.scale.set(0.7, 0.7, 0.7); // 모델의 크기 조절
-      itemModel.position.copy(item.position);
-      itemModel.castShadow = true; // 그림자 캐스팅 활성화
 
-      scene.add(itemModel); // 씬에 모델 추가
-      enemies.push(itemModel);
-
-      itemModel.update = () => {
-         itemModel.position.copy(item.position);
-      };
-
-   });
-
-   // 박스 모델 생성
-   const item = new Box({
-      width: 1,
-      height: 1,
-      depth: 1,
-      position: {
-         x: (Math.random() - 0.7) * 5,
-         y: -1.5,
-         z: -40
-      },
-      velocity: {
-         x: 0,
-         y: 0,
-         z: 0.005
-      },
-      color: 'white',
-      opacity: 0.0,
-      transparent: true,
-      zAcceleration: true
-   });
-
-   item.castShadow = true;
-   scene.add(item);
-   enemies.push(item);
+   frames++
 }
+
+// 점수 변수
+let score = -100;
+
+// 화면에 점수 업데이트
+function updateScore() {
+   const scoreElement = document.getElementById("score");
+   if (scoreElement) {
+      scoreElement.textContent = `Score: ${score}`;
+   }
+}
+
+// 점수 증가
+function incrementScore() {
+   score += 100
+   updateScore();
+}
+
+// 초기 점수 설정
+updateScore();
+
 
 function removeAllObjects() {
    for (let i = scene.children.length - 1; i >= 0; i--) {
