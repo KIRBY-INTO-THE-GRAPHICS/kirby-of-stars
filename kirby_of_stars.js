@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; 
 
 const scene = new THREE.Scene()
+const clock = new THREE.Clock()
 
 // 카메라 세팅
 const camera = new THREE.PerspectiveCamera(
@@ -53,9 +54,11 @@ class Box extends THREE.Mesh {
      this.position.set(position.x, position.y, position.z);
  
      this.velocity = velocity;
-     this.gravity = -0.002;
+     this.gravity = -0.0019;
  
      this.zAcceleration = zAcceleration;
+
+     this.isJumping = false;
  
      this.updateSides();
    }
@@ -89,8 +92,8 @@ class Box extends THREE.Mesh {
        box1: this,
        box2: ground
      })) {
-       const friction = 0.5;
-       this.velocity.y *= -friction;
+       this.velocity.y *= 0;
+       this.isJumping = false;
      } else {
        this.position.y += this.velocity.y;
      }
@@ -145,19 +148,28 @@ function boxCollision({ box1, box2 }) {
 
 // 플레이어(커비)
 let playerModel
+let mixer
 // GLTF 모델을 로드하는 함수
 function loadKirbyModel() {
    const loader = new GLTFLoader();
-   loader.load('assets/kirby/kirby.glb', (gltf) => {
-     playerModel = gltf.scene;
-     playerModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
-     playerModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
-     playerModel.rotation.y = Math.PI;
-     playerModel.castShadow = true;
-     scene.add(playerModel);
-     animate(); // 모델 로드 후 애니메이션 시작
+   loader.load('assets/kirby/kirby_animation.glb', (gltf) => {
+      playerModel = gltf.scene;
+      playerModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
+      playerModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
+      playerModel.castShadow = true;
+      scene.add(playerModel);
+
+      // AnimationMixer를 생성합니다.
+      mixer = new THREE.AnimationMixer(playerModel);
+
+      // 모든 애니메이션 클립을 재생합니다.
+      gltf.animations.forEach((clip) => {
+         mixer.clipAction(clip).play();
+      });
+
+      animate(); // 모델 로드 후 애니메이션 시작
    });
- }
+}
 
  const player = new Box({
    width: 1,
@@ -346,7 +358,10 @@ window.addEventListener('keydown', (event) => {
       keys.d.pressed = true
       break
     case 'Space':
-      player.velocity.y = 0.08
+      if (!player.isJumping) { // 점프 상태가 아닐 때만 점프를 허용
+         player.velocity.y = 0.12
+         player.isJumping = true; // 점프 상태로 설정
+      }
       break
   }
 })
@@ -367,7 +382,7 @@ const enemies = []
 
 // 애니메이션 설정 부분
 let frames = 0
-let spawnRate = 100
+let spawnRate = 150
 function animate() {
   const animationId = requestAnimationFrame(animate)
   renderer.render(scene, camera)
@@ -438,10 +453,15 @@ function animate() {
   else if (keys.d.pressed) player.velocity.x = 0.05
 
   if (playerModel) {
-   player.update(ground); // 플레이어 물리적 위치 업데이트
-   playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
-   playerModel.rotation.y = Math.PI;
- }
+     player.update(ground); // 플레이어 물리적 위치 업데이트
+     playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
+     playerModel.rotation.y = Math.PI;
+
+     // 커비 뛰는 애니메이션 적용
+     const delta = clock.getDelta();
+     if (mixer) mixer.update(delta);
+
+  }
   
   enemies.forEach((enemy) => {
     enemy.update(ground)
