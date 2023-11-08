@@ -601,7 +601,28 @@ function animateFly() {
     scene.add(dragonfly)
     flyingEnemies.push(dragonfly)
     loadDragonflyModel();
+    incrementScore();
   }
 
   frames2++
 };
+
+// 점수 변수
+let score = 0;
+
+// 화면에 점수 업데이트
+function updateScore() {
+    const scoreElement = document.getElementById("score");
+    if (scoreElement) {
+        scoreElement.textContent = `Score: ${score}`;
+    }
+}
+
+// 점수 증가
+function incrementScore() {
+    score += 100
+    updateScore();
+}
+
+// 초기 점수 설정
+updateScore();
