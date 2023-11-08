@@ -544,11 +544,13 @@ function animate() {
 
       const rand = Math.random();
       if (rand < 0.3) {
-        loadStarModel(enemy);
+         loadStarModel(enemy);
       } else if (rand < 0.5) {
-        loadDragonflyModel(enemy);
+         loadDragonflyModel(enemy);
+         incrementScore()
       } else {
-        loadBoxModel(enemy);
+         loadBoxModel(enemy);
+         incrementScore()
       }
       
    }
@@ -572,7 +574,6 @@ function animate() {
          enemy.model.position.copy(enemy.position);
       }
    })
-
 
    frames++
 }
