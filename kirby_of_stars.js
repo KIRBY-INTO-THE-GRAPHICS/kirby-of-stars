@@ -167,7 +167,7 @@ function loadKirbyModel() {
       });
 
       animate(); // 모델 로드 후 애니메이션 시작
-      animateFly();
+      
    });
 }
 
@@ -223,7 +223,7 @@ gltfLoader.load('assets/img/grassground.glb', (gltf) => {
       grassArray.push(grass);
    }
    animate()
-   animateFly();
+   
 });
 
 gltfLoader.load('assets/img/grassground.glb', (gltf) => {
@@ -239,7 +239,7 @@ gltfLoader.load('assets/img/grassground.glb', (gltf) => {
       grass2Array.push(grass);
    }
    animate();
-   animateFly();
+   
 });
 
 // 배경 - 나무
@@ -260,7 +260,7 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
       treeArray.push(tree);
    }
    animate();
-   animateFly();
+   
 
 });
 
@@ -277,7 +277,7 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
       tree2Array.push(tree);
    }
    animate();
-   animateFly();
+   
 });
 
 // 배경 - 꽃
@@ -313,7 +313,7 @@ gltfLoader.load('assets/img/flower2.glb', (gltf) => {
       flower2Array.push(flower);
    }
    animate();
-   animateFly();
+   
 });
 
 // 배경 - 구름
@@ -333,7 +333,7 @@ gltfLoader.load('assets/img/cloud.glb', (gltf) => {
       cloudArray.push(cloud);
    }
    animate();
-   animateFly();
+   
 });
 
 // 조명
@@ -391,7 +391,7 @@ const enemies = []
 // 잠자리 모델을 로드하는 함수
 function loadDragonflyModel(enemy) {
    const loader = new GLTFLoader();
-   loader.load('assets/enemy/dragonfly.glb', (gltf) => {
+   loader.load('assets/obstacle/dragonfly.glb', (gltf) => {
       const dragonflyModel = gltf.scene;
       dragonflyModel.scale.set(0.3, 0.3, 0.3); // 모델의 크기를 조정합니다.
       dragonflyModel.position.copy(enemy.position); // Box 객체의 초기 위치를 가져옴
@@ -486,12 +486,12 @@ function animate() {
 
    }
 
-   if (frames % spawnRate === 0) {
-      if (spawnRate > 30) spawnRate -= 0.5
+/*   if (frames % spawnRate === 0) {
+      if (spawnRate > 30) spawnRate -= 0.5*/
 
       loadObstacleObject()
       if (frames % 5 === 0) loadStarObject()
-   }
+   //}
 
 
    frames++
@@ -560,6 +560,7 @@ function loadObstacleObject() {
          cancelAnimationFrame(animationId)
       }
       if (enemy && enemy.model) {
+         enemy.model.position.copy(enemy.position);
          // 잠자리일때 모델 rotation
          if (enemy.model && enemy.type === 'dragonfly') {
             enemy.model.rotation.y = -10.3;
