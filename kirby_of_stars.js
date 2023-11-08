@@ -133,7 +133,6 @@ function addSky() {
 
 addSky();
 
-
 function boxCollision({ box1, box2 }) {
   const xCollision = box1.right >= box2.left && box1.left <= box2.right
   const yCollision =
@@ -172,6 +171,7 @@ function loadKirbyModel() {
      z: 0
    }
  });
+
 loadKirbyModel();
 
 // 배경 - 바닥
@@ -212,6 +212,7 @@ gltfLoader.load('assets/img/grassground.glb', (gltf) => {
   }
   animate();
 });
+
 gltfLoader.load('assets/img/grassground.glb', (gltf) => {
   const grassModel = gltf.scene;
   grassModel.scale.set(0.03, 0.01, 0.05);
@@ -246,6 +247,7 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
   }
   animate();
 });
+
 gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
   const treeModel = gltf.scene;
   treeModel.scale.set(0.1, 0.1, 0.1);
@@ -280,6 +282,7 @@ gltfLoader.load('assets/img/flower2.glb', (gltf) => {
   }
   animate();
 });
+
 gltfLoader.load('assets/img/flower2.glb', (gltf) => {
   const flowerModel = gltf.scene;
   flowerModel.scale.set(0.15, 0.15, 0.15);
@@ -364,7 +367,6 @@ window.addEventListener('keyup', (event) => {
 
 const enemies = []
 
-
 // 애니메이션 설정 부분
 let frames = 0
 let spawnRate = 100
@@ -441,7 +443,7 @@ function animate() {
    player.update(ground); // 플레이어 물리적 위치 업데이트
    playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
    playerModel.rotation.y = Math.PI;
- }
+  }
   
   enemies.forEach((enemy) => {
     enemy.update(ground)
@@ -456,29 +458,93 @@ function animate() {
   })
 
   if (frames % spawnRate === 0) {
-    if (spawnRate > 1) spawnRate -= 0.5
+    if (spawnRate > 30) spawnRate -= 0.5
 
-    const enemy = new Box({
-      width: 1,
-      height: 1,
-      depth: 1,
-      position: {
-        x: (Math.random() - 0.75) * 10,
-        y: 0,
-        z: -20
-      },
-      velocity: {
-        x: 0,
-        y: 0,
-        z: 0.005
-      },
-      color: 'red',
-      zAcceleration: true
-    })
-    enemy.castShadow = true
-    scene.add(enemy)
-    enemies.push(enemy)
+    loadObstacleModel()
+    if(frames % 5 === 0) loadStarModel()
   }
 
   frames++
+  removeAllObjects();
+}
+
+function loadObstacleModel() {
+  const enemy = new Box({
+    width: 1,
+    height: 1,
+    depth: 1,
+    position: {
+      x: (Math.random() - 0.75) * 10,
+      y: 0,
+      z: -20
+    },
+    velocity: {
+      x: 0,
+      y: 0,
+      z: 0.005
+    },
+    color: 'red',
+    zAcceleration: true
+  })
+  enemy.castShadow = true
+  scene.add(enemy)
+  enemies.push(enemy)
+}
+
+let itemModel; // itemModel 변수 선언
+function loadStarModel() {
+  const loader = new GLTFLoader();
+  // 모델 로드
+  loader.load('assets/img/star.glb', (gltf) => {
+    itemModel = gltf.scene; // 로드한 모델을 itemModel 변수에 할당
+    itemModel.scale.set(0.7, 0.7, 0.7); // 모델의 크기 조절
+    itemModel.position.copy(item.position);
+    itemModel.castShadow = true; // 그림자 캐스팅 활성화
+
+    scene.add(itemModel); // 씬에 모델 추가
+    enemies.push(itemModel);
+
+    itemModel.update = () => {
+      itemModel.position.copy(item.position);
+    };  
+
+  });
+
+  // 박스 모델 생성
+  const item = new Box({
+    width: 1,
+    height: 1,
+    depth: 1,
+    position: {
+      x: (Math.random() - 0.75) * 10,
+      y: 0,
+      z: -20
+    },
+    velocity: {
+      x: 0,
+      y: 0,
+      z: 0.005
+    },
+    color: 'white',
+    opacity: 0.3,
+    transparent: true,
+    zAcceleration: true
+  });
+
+  item.castShadow = true;
+  scene.add(item);
+  enemies.push(item);
+}
+
+function removeAllObjects() {
+  for (let i = scene.children.length - 1; i >= 0; i--) {
+    const obj = scene.children[i];
+    if (obj.update) {
+      obj.update();
+    }
+    if (obj.position.z > 10) {
+      // 화면에서 벗어난 객체 모델 제거
+      scene.remove(obj);
+    }
+  }
 }
