@@ -526,7 +526,7 @@ function loadStarModel() {
       z: 0.005
     },
     color: 'white',
-    opacity: 0.3,
+    opacity: 0.0,
     transparent: true,
     zAcceleration: true
   });
