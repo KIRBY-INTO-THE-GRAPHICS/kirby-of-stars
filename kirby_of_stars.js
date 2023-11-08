@@ -387,6 +387,8 @@ window.addEventListener('keyup', (event) => {
    }
 })
 
+var animationId;
+
 const enemies = []
 // 잠자리 모델을 로드하는 함수
 function loadDragonflyModel(enemy) {
@@ -407,8 +409,8 @@ function loadDragonflyModel(enemy) {
 let frames = 0
 let spawnRate = 150
 function animate() {
-   const animationId = requestAnimationFrame(animate)
-   renderer.render(scene, camera)
+  animationId = requestAnimationFrame(animate)
+  renderer.render(scene, camera)
 
    // 배경 객체들 움직이게 하는 애니메이션
    //grass
@@ -483,7 +485,6 @@ function animate() {
       // 커비 뛰는 애니메이션 적용
       const delta = clock.getDelta();
       if (mixer) mixer.update(delta);
-
    }
 
 /*   if (frames % spawnRate === 0) {
@@ -557,7 +558,7 @@ function loadObstacleObject() {
             box2: enemy
          })
       ) {
-         cancelAnimationFrame(animationId)
+         gameOver();
       }
       if (enemy && enemy.model) {
          enemy.model.position.copy(enemy.position);
@@ -627,4 +628,22 @@ function removeAllObjects() {
          scene.remove(obj);
       }
    }
+}
+
+const gameOverScreen = document.getElementById('game-over');
+const finalScore = document.getElementById('final-score');
+const restartButton = document.getElementById('restart-button');
+
+restartButton.addEventListener('click', () => {
+  location.reload();
+});
+
+function gameOver() {
+  cancelAnimationFrame(animationId);
+
+  // Show the game over screen
+  gameOverScreen.style.display = 'block';
+
+  // Update the final score
+  finalScore.textContent = score;
 }
