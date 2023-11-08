@@ -186,22 +186,6 @@ const player = new Box({
 });
 loadKirbyModel();
 
-// 공중 적(잠자리)
-let dragonflyModel;
-// GLTF 모델을 로드하는 함수
-function loadDragonflyModel() {
-   const loader = new GLTFLoader();
-   loader.load('assets/obstacle/dragonfly.glb', (gltf) => {
-      dragonflyModel = gltf.scene;
-      dragonflyModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기 설정
-      dragonflyModel.position.copy(dragonfly.position); // Box 객체의 초기 위치를 가져옴
-      dragonflyModel.rotation.y = -10.3;
-      dragonflyModel.castShadow = true;
-      scene.add(dragonflyModel);
-      // animateFly(); // 모델 로드 후 애니메이션 시작
-   });
-}
-
 // 배경 - 바닥
 // 기본 바닥(중력을 위한한)
 const ground = new Box({
