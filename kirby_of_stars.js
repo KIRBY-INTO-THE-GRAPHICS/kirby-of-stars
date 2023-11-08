@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; 
 
 const scene = new THREE.Scene()
+const clock = new THREE.Clock()
 
 // 카메라 세팅
 const camera = new THREE.PerspectiveCamera(
@@ -11,7 +12,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 )
-camera.position.set(15, 7, 3)
+camera.position.set(2,5,7)
 
 const renderer = new THREE.WebGLRenderer({
   alpha: true,
@@ -53,9 +54,11 @@ class Box extends THREE.Mesh {
      this.position.set(position.x, position.y, position.z);
  
      this.velocity = velocity;
-     this.gravity = -0.002;
+     this.gravity = -0.0019;
  
      this.zAcceleration = zAcceleration;
+
+     this.isJumping = false;
  
      this.updateSides();
    }
@@ -89,8 +92,8 @@ class Box extends THREE.Mesh {
        box1: this,
        box2: ground
      })) {
-       const friction = 0.5;
-       this.velocity.y *= -friction;
+       this.velocity.y *= 0;
+       this.isJumping = false;
      } else {
        this.position.y += this.velocity.y;
      }
@@ -145,20 +148,29 @@ function boxCollision({ box1, box2 }) {
 
 // 플레이어(커비)
 let playerModel
+let mixer
 // GLTF 모델을 로드하는 함수
 function loadKirbyModel() {
    const loader = new GLTFLoader();
-   loader.load('assets/kirby/kirby.glb', (gltf) => {
-     playerModel = gltf.scene;
-     playerModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
-     playerModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
-     playerModel.rotation.y = Math.PI;
-     playerModel.castShadow = true;
-     scene.add(playerModel);
-     animate(); // 모델 로드 후 애니메이션 시작
-     animateFly();
+   loader.load('assets/kirby/kirby_animation.glb', (gltf) => {
+      playerModel = gltf.scene;
+      playerModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
+      playerModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
+      playerModel.castShadow = true;
+      scene.add(playerModel);
+
+      // AnimationMixer를 생성합니다.
+      mixer = new THREE.AnimationMixer(playerModel);
+
+      // 모든 애니메이션 클립을 재생합니다.
+      gltf.animations.forEach((clip) => {
+         mixer.clipAction(clip).play();
+      });
+
+      animate(); // 모델 로드 후 애니메이션 시작
+      animateFly();
    });
- }
+}
 
  const player = new Box({
    width: 1,
@@ -194,90 +206,147 @@ function loadDragonflyModel() {
 // 배경 - 바닥
 // 기본 바닥(중력을 위한한)
 const ground = new Box({
-  width: 100000,
+  width: 100,
   height: 0,
-  depth: 100000,
+  depth: 80,
   color: '#65a95e',
   position: {
     x: 0,
     y: -2,
-    z: 0
+    z: -15
   }
 })
 ground.receiveShadow = true
 scene.add(ground)
 
 const gltfLoader = new GLTFLoader();
+
+const backgroundSpeed = 0.05; 
 // 배경 - 잔디
+const grassCount = 11;
+const grassSpacing = 5;
 let grassArray = [];
-gltfLoader.load('assets/img/animgrass.glb', (gltf) => {
+let grass2Array = [];
+gltfLoader.load('assets/img/grassground.glb', (gltf) => {
   const grassModel = gltf.scene;
-
-  grassModel.scale.set(0.07, 0.1, 0.7);
-
+  grassModel.scale.set(0.05, 0.01, 0.05);
   grassModel.castShadow = true;
   grassModel.receiveShadow = true;
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < grassCount; i++) {
     const grass = grassModel.clone();
-    grass.position.set(-10, -1.95, -120 * i);
+    grass.position.set(-10, -1.95, -grassSpacing * i);
     scene.add(grass);
     grassArray.push(grass);
-
-    const grass2 = grassModel.clone();
-    grass2.position.set(9, -1.95, -120 * i);
-    scene.add(grass2);
-    grassArray.push(grass2);
   }
     animate()
     animateFly();
+});
+gltfLoader.load('assets/img/grassground.glb', (gltf) => {
+  const grassModel = gltf.scene;
+  grassModel.scale.set(0.03, 0.01, 0.05);
+  grassModel.castShadow = true;
+  grassModel.receiveShadow = true;
+
+  for (let i = 0; i < grassCount; i++) {
+    const grass = grassModel.clone();
+    grass.position.set(7, -1.95, -grassSpacing * i);
+    scene.add(grass);
+    grass2Array.push(grass);
+  }
+  animate();
+  animateFly();
 });
 
 // 배경 - 나무
+const treeCount = 3;
+const treeSpacing = 20;
 let treeArray = [];
-gltfLoader.load('assets/img/tree.glb', (gltf) => {
+let tree2Array = [];
+gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
   const treeModel = gltf.scene;
-
-  treeModel.scale.set(1.11, 1, 1.2);
-
+  treeModel.scale.set(0.1, 0.1, 0.1);
   treeModel.castShadow = true;
   treeModel.receiveShadow = true;
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < treeCount; i++) {
     const tree = treeModel.clone();
-    tree.position.set(-10, -1.95, -30 * i);
+    tree.position.set(-10, -1.95, -treeSpacing * i);
     scene.add(tree);
     treeArray.push(tree);
   }
-    animate()
-    animateFly()
+    animate();
+    animateFly();
+});
+gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
+  const treeModel = gltf.scene;
+  treeModel.scale.set(0.1, 0.1, 0.1);
+  treeModel.castShadow = true;
+  treeModel.receiveShadow = true;
+
+  for (let i = 0; i < treeCount; i++) {
+    const tree = treeModel.clone();
+    tree.position.set(9, -1.95, -treeSpacing * i);
+    scene.add(tree);
+    tree2Array.push(tree);
+  }
+  animate();
+  animateFly();
 });
 
 // 배경 - 꽃
+const flowerCount = 11;
+const flowerSpacing = 5;
 let flowerArray = [];
+let flower2Array = [];
 gltfLoader.load('assets/img/flower2.glb', (gltf) => {
   const flowerModel = gltf.scene;
-
   flowerModel.scale.set(0.15, 0.15, 0.15);
-
   flowerModel.castShadow = true;
   flowerModel.receiveShadow = true;
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < flowerCount; i++) {
     const flower = flowerModel.clone();
-    flower.position.set(-5, -1.95, - 2 * i);
+    flower.position.set(-5, -1.95, -flowerSpacing * i);
     scene.add(flower);
     flowerArray.push(flower);
   }
+  animate();
+});
+gltfLoader.load('assets/img/flower2.glb', (gltf) => {
+  const flowerModel = gltf.scene;
+  flowerModel.scale.set(0.15, 0.15, 0.15);
+  flowerModel.castShadow = true;
+  flowerModel.receiveShadow = true;
 
-  for (let i = 0; i < 100; i++) {
-    const flower2 = flowerModel.clone();
-    flower2.position.set(4, -1.95, - 3 * i);
-    scene.add(flower2);
-    flowerArray.push(flower2);
+  for (let i = 0; i < flowerCount; i++) {
+    const flower = flowerModel.clone();
+    flower.position.set(4, -1.95, -flowerSpacing * i);
+    scene.add(flower);
+    flower2Array.push(flower);
   }
-    animate()
+    animate();
     animateFly();
+});
+
+// 배경 - 구름
+const cloudCount = 5;
+const cloudSpacing = 10;
+let cloudArray = [];
+gltfLoader.load('assets/img/cloud.glb', (gltf) => {
+  const cloudModel = gltf.scene;
+  cloudModel.scale.set(0.005, 0.005, 0.005);
+  cloudModel.castShadow = true;
+  cloudModel.receiveShadow = true;
+
+  for (let i = 0; i < cloudCount; i++) {
+    const cloud = cloudModel.clone();
+    cloud.position.set(Math.random() < 0.5 ? -10 - Math.random() * 10 : 4 + Math.random() * 10, 4, -cloudSpacing * i);
+    scene.add(cloud);
+    cloudArray.push(cloud);
+  }
+  animate();
+  animateFly();
 });
 
 // 조명
@@ -312,7 +381,10 @@ window.addEventListener('keydown', (event) => {
       keys.d.pressed = true
       break
     case 'Space':
-      player.velocity.y = 0.08
+      if (!player.isJumping) { // 점프 상태가 아닐 때만 점프를 허용
+         player.velocity.y = 0.12
+         player.isJumping = true; // 점프 상태로 설정
+      }
       break
   }
 })
@@ -333,25 +405,67 @@ const enemies = []
 
 // 애니메이션 설정 부분
 let frames = 0
-let spawnRate = 100
-let grassSpeed = 0.05
-
+let spawnRate = 150
 function animate() {
   const animationId = requestAnimationFrame(animate)
   renderer.render(scene, camera)
 
   // 배경 객체들 움직이게 하는 애니메이션
   //grass
+  // 객체를 뒤로 이동
   for (let i = 0; i < grassArray.length; i++) {
-    grassArray[i].position.z += grassSpeed;
+    const grass = grassArray[i];
+    grass.position.z += backgroundSpeed;
+    // 화면 밖으로 나가면 초기 위치로 이동
+    if (grass.position.z > grassSpacing) {
+      grass.position.z = -grassSpacing * (grassArray.length - 1);
+    }
+  }
+  for (let i = 0; i < grass2Array.length; i++) {
+    const grass = grass2Array[i];
+    grass.position.z += backgroundSpeed;
+    if (grass.position.z > grassSpacing) {
+      grass.position.z = -grassSpacing * (grass2Array.length - 1);
+    }
   }
   //tree
   for (let i = 0; i < treeArray.length; i++) {
-    treeArray[i].position.z += grassSpeed;
+    const tree = treeArray[i];
+    tree.position.z += backgroundSpeed;
+    if (tree.position.z > treeSpacing) {
+      tree.position.z = -treeSpacing * (treeArray.length - 1);
+    }
+  }
+  for (let i = 0; i < tree2Array.length; i++) {
+    const tree = tree2Array[i];
+    tree.position.z += backgroundSpeed;
+    if (tree.position.z > treeSpacing) {
+      tree.position.z = -treeSpacing * (tree2Array.length - 1);
+    }
   }
   //flower
   for (let i = 0; i < flowerArray.length; i++) {
-    flowerArray[i].position.z += grassSpeed;
+    const flower = flowerArray[i];
+    flower.position.z += backgroundSpeed;
+    if (flower.position.z > flowerSpacing) {
+      flower.position.z = -flowerSpacing * (flowerArray.length - 1);
+    }
+  }
+  for (let i = 0; i < flower2Array.length; i++) {
+    const flower = flower2Array[i];
+    flower.position.z += backgroundSpeed;
+    if (flower.position.z > flowerSpacing) {
+      flower.position.z = -flowerSpacing * (flower2Array.length - 1);
+    }
+  }
+  //cloud
+  for (let i = 0; i < cloudArray.length; i++) {
+    const cloud = cloudArray[i];
+    cloud.position.z += backgroundSpeed;
+    if (cloud.position.z > cloudSpacing) {
+      cloud.position.z = -cloudSpacing * (cloudArray.length - 1);
+      cloud.position.x = Math.random() < 0.5 ? -10 - Math.random() * 10 : 4 + Math.random() * 10;
+    }
   }
 
   // 플레이어 위치 설정
@@ -362,10 +476,16 @@ function animate() {
   else if (keys.d.pressed) player.velocity.x = 0.05
 
   if (playerModel) {
-   player.update(ground); // 플레이어 물리적 위치 업데이트
-   playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
-   playerModel.rotation.y = Math.PI;
- }
+     player.update(ground); // 플레이어 물리적 위치 업데이트
+     playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
+     playerModel.rotation.y = Math.PI;
+
+     // 커비 뛰는 애니메이션 적용
+     const delta = clock.getDelta();
+     if (mixer) mixer.update(delta);
+
+  }
+
   enemies.forEach((enemy) => {
     enemy.update(ground)
     if (
