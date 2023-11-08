@@ -156,6 +156,7 @@ function loadKirbyModel() {
      playerModel.castShadow = true;
      scene.add(playerModel);
      animate(); // 모델 로드 후 애니메이션 시작
+     animateFly();
    });
  }
 
@@ -165,7 +166,7 @@ function loadKirbyModel() {
    depth: 1,
    color: '#FFFFFF',
    opacity: 0,
-   transparent: true, 
+   transparent: true,
    velocity: {
      x: 0,
      y: -0.01,
@@ -173,6 +174,22 @@ function loadKirbyModel() {
    }
  });
 loadKirbyModel();
+
+// 공중 적(잠자리)
+let dragonflyModel;
+// GLTF 모델을 로드하는 함수
+function loadDragonflyModel() {
+  const loader = new GLTFLoader();
+  loader.load('assets/img/dragonfly.glb', (gltf) => {
+    dragonflyModel = gltf.scene;
+    dragonflyModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기 설정
+    dragonflyModel.position.copy(dragonfly.position); // Box 객체의 초기 위치를 가져옴
+    dragonflyModel.rotation.y = -10.3;
+    dragonflyModel.castShadow = true;
+    scene.add(dragonflyModel);
+    // animateFly(); // 모델 로드 후 애니메이션 시작
+  });
+}
 
 // 배경 - 바닥
 // 기본 바닥(중력을 위한한)
@@ -213,6 +230,7 @@ gltfLoader.load('assets/img/animgrass.glb', (gltf) => {
     grassArray.push(grass2);
   }
     animate()
+    animateFly();
 });
 
 // 배경 - 나무
@@ -232,6 +250,7 @@ gltfLoader.load('assets/img/tree.glb', (gltf) => {
     treeArray.push(tree);
   }
     animate()
+    animateFly()
 });
 
 // 배경 - 꽃
@@ -258,6 +277,7 @@ gltfLoader.load('assets/img/flower2.glb', (gltf) => {
     flowerArray.push(flower2);
   }
     animate()
+    animateFly();
 });
 
 // 조명
@@ -315,6 +335,7 @@ const enemies = []
 let frames = 0
 let spawnRate = 100
 let grassSpeed = 0.05
+
 function animate() {
   const animationId = requestAnimationFrame(animate)
   renderer.render(scene, camera)
@@ -332,7 +353,7 @@ function animate() {
   for (let i = 0; i < flowerArray.length; i++) {
     flowerArray[i].position.z += grassSpeed;
   }
-  
+
   // 플레이어 위치 설정
   player.velocity.x = 0
   player.velocity.z = 0
@@ -365,7 +386,7 @@ function animate() {
       height: 1,
       depth: 1,
       position: {
-        x: (Math.random() - 0.75) * 10,
+        x: (Math.random() - 0.7) * 5,
         y: 0,
         z: -20
       },
@@ -383,4 +404,84 @@ function animate() {
   }
 
   frames++
-}
+};
+
+// 애니메이션 설정 부분에 다음 코드 추가
+let flyingEnemies = [];
+
+// 애니메이션 설정 부분
+let frames2 = 0
+let spawnRate2 = 100
+
+const dragonfly = new Box({
+  width: 1,
+  height: 1,
+  depth: 1,
+  position: {
+    x: (Math.random() - 0.7) * 5,
+    y: 0,
+    z: -20
+  },
+  color: '#FFFFFF',
+  opacity: 0,
+  transparent: true,
+  velocity: {
+    x: 0,
+    y: 0,
+    z: 0.005
+  },
+  zAcceleration: true
+});
+function animateFly() {
+  const animationId = requestAnimationFrame(animateFly)
+  renderer.render(scene, camera)
+
+  if (dragonflyModel) {
+    dragonfly.update(ground); // 플레이어 물리적 위치 업데이트
+    dragonflyModel.position.copy(dragonfly.position); // 커비 모델 위치를 player 위치와 동기화
+    dragonflyModel.rotation.y = -10.3;
+  }
+
+ flyingEnemies.forEach((flyingEnemy) => {
+    flyingEnemy.update(ground)
+    if (
+      boxCollision({
+        box1: player,
+        box2: flyingEnemy
+      })
+    ) {
+      cancelAnimationFrame(animationId)
+    }
+  })
+
+  if (frames2 % spawnRate2 === 0) {
+    if (spawnRate2 > 1) spawnRate2 -= 0.5
+
+    const dragonfly = new Box({
+      width: 1,
+      height: 1,
+      depth: 1,
+      position: {
+        x: (Math.random() - 0.7) * 5,
+        y: 0,
+        z: -20
+      },
+      color: '#FFFFFF',
+      opacity: 0,
+      transparent: true,
+      velocity: {
+        x: 0,
+        y: 0,
+        z: 0.005
+      },
+      zAcceleration: true
+    });
+
+    dragonfly.castShadow = true
+    scene.add(dragonfly)
+    flyingEnemies.push(dragonfly)
+    loadDragonflyModel();
+  }
+
+  frames2++
+};
