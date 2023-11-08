@@ -403,13 +403,21 @@ window.addEventListener('keyup', (event) => {
   }
 })
 
+var animationId1;
+var animationId2;
+
+// function cancelAnimations() {
+//   cancelAnimationFrame(animationId1);
+//   cancelAnimationFrame(animationId2);
+// }
+
 const enemies = []
 
 // 애니메이션 설정 부분
 let frames = 0
 let spawnRate = 150
 function animate() {
-  const animationId = requestAnimationFrame(animate)
+  animationId1 = requestAnimationFrame(animate)
   renderer.render(scene, camera)
 
   // 배경 객체들 움직이게 하는 애니메이션
@@ -496,7 +504,7 @@ function animate() {
         box2: enemy
       })
     ) {
-      cancelAnimationFrame(animationId)
+      cancelAnimations();
     }
   })
 
@@ -539,7 +547,7 @@ const dragonfly = new Box({
 });
 
 function animateFly() {
-  const animationId = requestAnimationFrame(animateFly)
+  animationId2 = requestAnimationFrame(animateFly)
   renderer.render(scene, camera)
 
   if (dragonflyModel) {
@@ -556,7 +564,7 @@ function animateFly() {
         box2: flyingEnemy
       })
     ) {
-      cancelAnimationFrame(animationId)
+      cancelAnimations();
     }
   })
 
@@ -651,7 +659,7 @@ function loadStarModel() {
 
     itemModel.update = () => {
       itemModel.position.copy(item.position);
-    };  
+    };
 
   });
 
@@ -692,4 +700,23 @@ function removeAllObjects() {
       scene.remove(obj);
     }
   }
+}
+
+const gameOverScreen = document.getElementById('game-over');
+const finalScore = document.getElementById('final-score');
+const restartButton = document.getElementById('restart-button');
+
+restartButton.addEventListener('click', () => {
+  location.reload();
+});
+
+function cancelAnimations() {
+  cancelAnimationFrame(animationId1);
+  cancelAnimationFrame(animationId2);
+
+  // Show the game over screen
+  gameOverScreen.style.display = 'block';
+
+  // Update the final score
+  finalScore.textContent = score;
 }
