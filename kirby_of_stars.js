@@ -598,9 +598,9 @@ function loadObstacleModel() {
     height: 1,
     depth: 1,
     position: {
-      x: (Math.random() - 0.75) * 10,
+      x: (Math.random() - 0.7) * 10,
       y: 0,
-      z: -20
+      z: -40
     },
     velocity: {
       x: 0,
@@ -613,7 +613,7 @@ function loadObstacleModel() {
   enemy.castShadow = true
   scene.add(enemy)
   enemies.push(enemy)
-}
+};
 
 let itemModel; // itemModel 변수 선언
 function loadStarModel() {
