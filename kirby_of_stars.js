@@ -222,7 +222,7 @@ const treeCount = 3;
 const treeSpacing = 20;
 let treeArray = [];
 let tree2Array = [];
-gltfLoader.load('assets/img/fantasy_low_poly_tree.glb', (gltf) => {
+gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
   const treeModel = gltf.scene;
   treeModel.scale.set(0.1, 0.1, 0.1);
   treeModel.castShadow = true;
@@ -382,12 +382,11 @@ function animate() {
 
   // 배경 객체들 움직이게 하는 애니메이션
   //grass
-  // 나무들을 뒤로 이동
+  // 객체를 뒤로 이동
   for (let i = 0; i < grassArray.length; i++) {
     const grass = grassArray[i];
     grass.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
+    // 화면 밖으로 나가면 초기 위치로 이동
     if (grass.position.z > grassSpacing) {
       grass.position.z = -grassSpacing * (grassArray.length - 1);
     }
@@ -395,19 +394,14 @@ function animate() {
   for (let i = 0; i < grass2Array.length; i++) {
     const grass = grass2Array[i];
     grass.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
     if (grass.position.z > grassSpacing) {
       grass.position.z = -grassSpacing * (grass2Array.length - 1);
     }
   }
   //tree
-  // 나무들을 뒤로 이동
   for (let i = 0; i < treeArray.length; i++) {
     const tree = treeArray[i];
     tree.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
     if (tree.position.z > treeSpacing) {
       tree.position.z = -treeSpacing * (treeArray.length - 1);
     }
@@ -415,20 +409,14 @@ function animate() {
   for (let i = 0; i < tree2Array.length; i++) {
     const tree = tree2Array[i];
     tree.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
     if (tree.position.z > treeSpacing) {
       tree.position.z = -treeSpacing * (tree2Array.length - 1);
     }
   }
-  
   //flower
-  // 나무들을 뒤로 이동
   for (let i = 0; i < flowerArray.length; i++) {
     const flower = flowerArray[i];
     flower.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
     if (flower.position.z > flowerSpacing) {
       flower.position.z = -flowerSpacing * (flowerArray.length - 1);
     }
@@ -436,20 +424,15 @@ function animate() {
   for (let i = 0; i < flower2Array.length; i++) {
     const flower = flower2Array[i];
     flower.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
     if (flower.position.z > flowerSpacing) {
       flower.position.z = -flowerSpacing * (flower2Array.length - 1);
     }
   }
 
   //cloud
-  // 나무들을 뒤로 이동
   for (let i = 0; i < cloudArray.length; i++) {
     const cloud = cloudArray[i];
     cloud.position.z += backgroundSpeed;
-
-    // 나무가 화면 밖으로 나가면 초기 위치로 이동
     if (cloud.position.z > cloudSpacing) {
       cloud.position.z = -cloudSpacing * (cloudArray.length - 1);
       cloud.position.x = Math.random() < 0.5 ? -10 - Math.random() * 10 : 4 + Math.random() * 10;
