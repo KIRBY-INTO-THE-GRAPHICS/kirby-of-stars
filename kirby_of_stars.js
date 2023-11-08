@@ -508,7 +508,7 @@ function animate() {
   }
 
   frames++
-  removeAllObjects();
+  // removeAllObjects();
 }
 
 // 애니메이션 설정 부분에 다음 코드 추가
@@ -660,15 +660,15 @@ function loadStarModel() {
   enemies.push(item);
 }
 
-function removeAllObjects() {
-  for (let i = scene.children.length - 1; i >= 0; i--) {
-    const obj = scene.children[i];
-    if (obj.update) {
-      obj.update();
-    }
-    if (obj.position.z > 10) {
-      // 화면에서 벗어난 객체 모델 제거
-      scene.remove(obj);
-    }
-  }
-}
+// function removeAllObjects() {
+//   for (let i = scene.children.length - 1; i >= 0; i--) {
+//     const obj = scene.children[i];
+//     if (obj.update) {
+//       obj.update();
+//     }
+//     if (obj.position.z > 10) {
+//       // 화면에서 벗어난 객체 모델 제거
+//       scene.remove(obj);
+//     }
+//   }
+// }
