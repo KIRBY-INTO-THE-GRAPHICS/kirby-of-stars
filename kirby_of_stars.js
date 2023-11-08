@@ -594,7 +594,7 @@ function animateFly() {
 };
 
 // 점수 변수
-let score = 0;
+let score = -100;
 
 // 화면에 점수 업데이트
 function updateScore() {
