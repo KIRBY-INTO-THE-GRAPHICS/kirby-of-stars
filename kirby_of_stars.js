@@ -433,6 +433,21 @@ function loadBoxModel(enemy) {
    });
 }
 
+// 가시 모델을 로드하는 함수
+function loadThornModel(enemy) {
+   const loader = new GLTFLoader();
+   loader.load('assets/obstacle/thorn.glb', (gltf) => {
+      const thornModel = gltf.scene;
+      thornModel.scale.set(0.7, 0.7, 0.7);
+      thornModel.position.copy(enemy.position); 
+      thornModel.castShadow = true;
+      scene.add(thornModel);
+
+      enemy.model = thornModel; // Box 객체에 모델을 연결합니다.
+      enemy.type = 'box'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+   });
+}
+
 // 애니메이션 설정 부분
 let frames = 0
 let spawnRate = 150
@@ -537,7 +552,7 @@ function animate() {
          transparent: true,
          position: {
             x: (Math.random() - 0.7) * 10 + 3,
-            y: 0,
+            y: -1.3,
             z: -40
          },
          velocity: {
@@ -557,7 +572,11 @@ function animate() {
       } else if (rand < 0.2) {
          loadDragonflyModel(enemy);
          incrementScore()
-      } else {
+      } else if (rand < 0.5) {
+         loadThornModel(enemy);
+         incrementScore()
+      }
+      else {
          loadBoxModel(enemy);
          incrementScore()
       }
