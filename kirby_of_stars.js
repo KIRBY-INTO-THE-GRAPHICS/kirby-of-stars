@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene()
 const clock = new THREE.Clock()
+let backgroundSpeed = 0.05;
 
 // 카메라 세팅
 const camera = new THREE.PerspectiveCamera(
@@ -78,6 +79,7 @@ class Box extends THREE.Mesh {
       this.updateSides();
 
       if (this.zAcceleration) this.velocity.z += 0.0003;
+      backgroundSpeed += 0.00003;
 
       this.position.x += this.velocity.x;
       this.position.z += this.velocity.z;
@@ -187,7 +189,7 @@ const player = new Box({
 loadKirbyModel();
 
 // 배경 - 바닥
-// 기본 바닥(중력을 위한한)
+// 기본 바닥(중력을 위한)
 const ground = new Box({
    width: 100,
    height: 0,
@@ -204,7 +206,6 @@ scene.add(ground)
 
 const gltfLoader = new GLTFLoader();
 
-const backgroundSpeed = 0.05;
 // 배경 - 잔디
 const grassCount = 11;
 const grassSpacing = 5;
@@ -439,7 +440,6 @@ let spawnRate = 150
 function animate() {
   animationId = requestAnimationFrame(animate)
   renderer.render(scene, camera)
-
    // 배경 객체들 움직이게 하는 애니메이션
    //grass
    // 객체를 뒤로 이동
