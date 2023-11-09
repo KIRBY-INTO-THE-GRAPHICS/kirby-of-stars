@@ -421,7 +421,7 @@ function loadStarModel(item) {
 // 박스 모델을 로드하는 함수
 function loadBoxModel(enemy) {
    const loader = new GLTFLoader();
-   loader.load('assets/obstacle/obstacle_box_small.glb', (gltf) => {
+   loader.load('assets/obstacle/box.glb', (gltf) => {
       const boxModel = gltf.scene;
       boxModel.scale.set(0.7, 0.7, 0.7);
       boxModel.position.copy(enemy.position); 
@@ -527,7 +527,7 @@ function animate() {
 
    // 장애물 생성
    if (frames % spawnRate === 0) {
-      if (spawnRate > 1) spawnRate -= 0.5
+      if (spawnRate > 40) spawnRate -= 0.5
 
       const enemy = new Box({
          width: 1,
@@ -536,14 +536,14 @@ function animate() {
          opacity: 0,
          transparent: true,
          position: {
-            x: (Math.random() - 0.7) * 10,
+            x: (Math.random() - 0.7) * 10 + 3,
             y: 0,
             z: -40
          },
          velocity: {
             x: 0,
             y: 0,
-            z: 0.005
+            z: 0
          },
          zAcceleration: true
       })
@@ -552,9 +552,9 @@ function animate() {
       enemies.push(enemy)
 
       const rand = Math.random();
-      if (rand < 0.3) {
+      if (rand < 0.05) {
          loadStarModel(enemy);
-      } else if (rand < 0.5) {
+      } else if (rand < 0.2) {
          loadDragonflyModel(enemy);
          incrementScore()
       } else {
@@ -600,7 +600,7 @@ function updateScore() {
 
 // 점수 증가
 function incrementScore() {
-   score += 100
+   score += 50
    updateScore();
 }
 
