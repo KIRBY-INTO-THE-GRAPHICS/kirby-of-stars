@@ -411,7 +411,7 @@ function loadStarModel(item) {
    loader.load('assets/img/star.glb', (gltf) => {
       const starModel = gltf.scene;
       starModel.scale.set(0.7, 0.7, 0.7);
-      starModel.position.copy(item.position); 
+      starModel.position.copy(item.position);
       starModel.castShadow = true;
       scene.add(starModel);
 
@@ -425,11 +425,26 @@ function loadBoxModel(enemy) {
    loader.load('assets/obstacle/box.glb', (gltf) => {
       const boxModel = gltf.scene;
       boxModel.scale.set(0.7, 0.7, 0.7);
-      boxModel.position.copy(enemy.position); 
+      boxModel.position.copy(enemy.position);
       boxModel.castShadow = true;
       scene.add(boxModel);
 
       enemy.model = boxModel; // Box 객체에 모델을 연결합니다.
+      enemy.type = 'box'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+   });
+}
+
+// 가시 모델을 로드하는 함수
+function loadThornModel(enemy) {
+   const loader = new GLTFLoader();
+   loader.load('assets/obstacle/thorn.glb', (gltf) => {
+      const thornModel = gltf.scene;
+      thornModel.scale.set(0.7, 0.7, 0.7);
+      thornModel.position.copy(enemy.position); 
+      thornModel.castShadow = true;
+      scene.add(thornModel);
+
+      enemy.model = thornModel; // Box 객체에 모델을 연결합니다.
       enemy.type = 'box'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
    });
 }
@@ -537,7 +552,7 @@ function animate() {
          transparent: true,
          position: {
             x: (Math.random() - 0.7) * 10 + 3,
-            y: 0,
+            y: -1.3,
             z: -40
          },
          velocity: {
@@ -557,7 +572,11 @@ function animate() {
       } else if (rand < 0.2) {
          loadDragonflyModel(enemy);
          incrementScore()
-      } else {
+      } else if (rand < 0.5) {
+         loadThornModel(enemy);
+         incrementScore()
+      }
+      else {
          loadBoxModel(enemy);
          incrementScore()
       }
@@ -578,7 +597,7 @@ function animate() {
          // 잠자리일때 모델 rotation
          if (enemy.model && enemy.type === 'dragonfly') {
             enemy.model.rotation.y = -10.3;
-            //enemy.position.y += 0.1;
+            enemy.gravity = -10;
          }
          enemy.model.position.copy(enemy.position);
       }
