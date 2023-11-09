@@ -147,15 +147,19 @@ function boxCollision({ box1, box2 }) {
 
 // 플레이어(커비)
 let playerModel
+let kirbyModel
 let mixer
+let kirbyStarModel
 // GLTF 모델을 로드하는 함수
 function loadKirbyModel() {
    const loader = new GLTFLoader();
    loader.load('assets/kirby/kirby_animation.glb', (gltf) => {
-      playerModel = gltf.scene;
-      playerModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
-      playerModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
-      playerModel.castShadow = true;
+      kirbyModel = gltf.scene;
+      kirbyModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
+      kirbyModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
+      kirbyModel.castShadow = true;
+      playerModel = kirbyModel
+
       scene.add(playerModel);
 
       // AnimationMixer를 생성합니다.
@@ -170,6 +174,44 @@ function loadKirbyModel() {
       
    });
 }
+// 별탄 커비 모델 로드
+function loadKirbyStarModel() {
+   const loader = new GLTFLoader();
+   loader.load('assets/img/dragonfly.glb', (gltf) => {
+      kirbyStarModel = gltf.scene;
+      kirbyStarModel.scale.set(0.4, 0.4, 0.4);
+      kirbyStarModel.position.copy(player.position);
+      kirbyStarModel.castShadow = true;
+   });
+}
+loadKirbyStarModel();
+
+// 이벤트 발생 시 5초간 모델을 바꾸는 함수
+function changePlayerModel() {
+   if (kirbyStarModel) {
+      // 커비 모델을 임시로 다른 모델로 교체
+      scene.remove(playerModel);
+      playerModel = kirbyStarModel;
+      scene.add(playerModel);
+      
+      // 5초 뒤에 원래 모델로 돌아옵니다.
+      setTimeout(() => {
+         scene.remove(playerModel);
+         playerModel = kirbyModel; // 가정: kirbyModel은 원래 커비 모델을 참조하는 변수입니다.
+         scene.add(playerModel);
+
+         
+         // 원래 커비 애니메이션 클립을 재생합니다.
+         gltf.animations.forEach((clip) => {
+            mixer.clipAction(clip).play();
+         });
+
+         animate(); // 모델 로드 후 애니메이션 시작
+
+      }, 5000);
+   }
+}
+
 
 const player = new Box({
    width: 1,
@@ -436,10 +478,12 @@ function loadBoxModel(enemy) {
 // 가시 모델을 로드하는 함수
 function loadThornModel(enemy) {
    const loader = new GLTFLoader();
-   loader.load('assets/obstacle/thorn.glb', (gltf) => {
+   loader.load('assets/obstacle/obstacle_thorn.glb', (gltf) => {
       const thornModel = gltf.scene;
       thornModel.scale.set(0.7, 0.7, 0.7);
-      thornModel.position.copy(enemy.position); 
+      thornModel.position.copy(enemy.position);
+      thornModel.position.x = -1;
+      console.log(thornModel.position.x);
       thornModel.castShadow = true;
       scene.add(thornModel);
 
@@ -518,12 +562,12 @@ function animate() {
    player.velocity.z = 0
 
    if (keys.a.pressed) {
-      console.log(player.position.x);
+      // console.log(player.position.x);
       if(player.position.x - 0.05 > - 3) {
          player.velocity.x = -0.05
       }
    } else if (keys.d.pressed) {
-      console.log(player.position.x);
+      // console.log(player.position.x);
       if(player.position.x + 0.05 < 5) {
          player.velocity.x = 0.05
       }
@@ -552,7 +596,7 @@ function animate() {
          transparent: true,
          position: {
             x: (Math.random() - 0.7) * 10 + 3,
-            y: -1.3,
+            y: 0,
             z: -40
          },
          velocity: {
@@ -572,7 +616,9 @@ function animate() {
       } else if (rand < 0.2) {
          loadDragonflyModel(enemy);
          incrementScore()
-      } else if (rand < 0.5) {
+      } else if (rand < 0.4) {
+         enemy.width = 20
+         enemy.position.x = 0
          loadThornModel(enemy);
          incrementScore()
       }
@@ -590,7 +636,12 @@ function animate() {
             box2: enemy
          })
       ) {
-         gameOver();
+         if(enemy && enemy.model) {
+            if(enemy.type === 'star') {
+               changePlayerModel()
+            }
+            else gameOver();
+         }
       }
       if (enemy && enemy.model) {
          enemy.model.position.copy(enemy.position);
@@ -598,6 +649,7 @@ function animate() {
          if (enemy.model && enemy.type === 'dragonfly') {
             enemy.model.rotation.y = -10.3;
             enemy.gravity = -10;
+            enemy.position.y = 2;
          }
          enemy.model.position.copy(enemy.position);
       }
