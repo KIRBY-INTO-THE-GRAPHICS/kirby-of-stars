@@ -410,7 +410,7 @@ function loadStarModel(item) {
    loader.load('assets/img/star.glb', (gltf) => {
       const starModel = gltf.scene;
       starModel.scale.set(0.7, 0.7, 0.7);
-      starModel.position.copy(item.position); 
+      starModel.position.copy(item.position);
       starModel.castShadow = true;
       scene.add(starModel);
 
@@ -424,7 +424,7 @@ function loadBoxModel(enemy) {
    loader.load('assets/obstacle/box.glb', (gltf) => {
       const boxModel = gltf.scene;
       boxModel.scale.set(0.7, 0.7, 0.7);
-      boxModel.position.copy(enemy.position); 
+      boxModel.position.copy(enemy.position);
       boxModel.castShadow = true;
       scene.add(boxModel);
 
@@ -597,7 +597,7 @@ function animate() {
          // 잠자리일때 모델 rotation
          if (enemy.model && enemy.type === 'dragonfly') {
             enemy.model.rotation.y = -10.3;
-            //enemy.position.y += 0.1;
+            enemy.gravity = -10;
          }
          enemy.model.position.copy(enemy.position);
       }
