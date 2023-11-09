@@ -234,7 +234,7 @@ gltfLoader.load('assets/img/grassground.glb', (gltf) => {
 
    for (let i = 0; i < grassCount; i++) {
       const grass = grassModel.clone();
-      grass.position.set(7, -1.95, -grassSpacing * i);
+      grass.position.set(10, -1.95, -grassSpacing * i);
       scene.add(grass);
       grass2Array.push(grass);
    }
@@ -272,7 +272,7 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
 
    for (let i = 0; i < treeCount; i++) {
       const tree = treeModel.clone();
-      tree.position.set(9, -1.95, -treeSpacing * i);
+      tree.position.set(12, -1.95, -treeSpacing * i);
       scene.add(tree);
       tree2Array.push(tree);
    }
@@ -308,7 +308,7 @@ gltfLoader.load('assets/img/flower2.glb', (gltf) => {
 
    for (let i = 0; i < flowerCount; i++) {
       const flower = flowerModel.clone();
-      flower.position.set(4, -1.95, -flowerSpacing * i);
+      flower.position.set(7, -1.95, -flowerSpacing * i);
       scene.add(flower);
       flower2Array.push(flower);
    }
@@ -502,8 +502,17 @@ function animate() {
    player.velocity.x = 0
    player.velocity.z = 0
 
-   if (keys.a.pressed) player.velocity.x = -0.05
-   else if (keys.d.pressed) player.velocity.x = 0.05
+   if (keys.a.pressed) {
+      console.log(player.position.x);
+      if(player.position.x - 0.05 > - 3) {
+         player.velocity.x = -0.05
+      }
+   } else if (keys.d.pressed) {
+      console.log(player.position.x);
+      if(player.position.x + 0.05 < 5) {
+         player.velocity.x = 0.05
+      }
+   }
 
    if (playerModel) {
       player.update(ground); // 플레이어 물리적 위치 업데이트
@@ -527,9 +536,9 @@ function animate() {
          opacity: 0,
          transparent: true,
          position: {
-            x: (Math.random() - 0.75) * 10,
+            x: (Math.random() - 0.7) * 10,
             y: 0,
-            z: -20
+            z: -40
          },
          velocity: {
             x: 0,
