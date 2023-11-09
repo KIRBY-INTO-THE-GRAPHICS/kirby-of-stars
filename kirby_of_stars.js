@@ -502,8 +502,17 @@ function animate() {
    player.velocity.x = 0
    player.velocity.z = 0
 
-   if (keys.a.pressed) player.velocity.x = -0.05
-   else if (keys.d.pressed) player.velocity.x = 0.05
+   if (keys.a.pressed) {
+      console.log(player.position.x);
+      if(player.position.x - 0.05 > - 3) {
+         player.velocity.x = -0.05
+      }
+   } else if (keys.d.pressed) {
+      console.log(player.position.x);
+      if(player.position.x + 0.05 < 5) {
+         player.velocity.x = 0.05
+      }
+   }
 
    if (playerModel) {
       player.update(ground); // 플레이어 물리적 위치 업데이트
