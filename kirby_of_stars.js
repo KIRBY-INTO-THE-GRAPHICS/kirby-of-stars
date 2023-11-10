@@ -60,6 +60,7 @@ class Box extends THREE.Mesh {
       this.zAcceleration = zAcceleration;
 
       this.isJumping = false;
+      this.isTransformed = false;
 
       this.updateSides();
    }
@@ -77,7 +78,6 @@ class Box extends THREE.Mesh {
 
    update(ground) {
       this.updateSides();
-
       // if (this.zAcceleration) {
       //   this.velocity.z += 0.0003;
       // }
@@ -158,7 +158,7 @@ let kirbyStarModel
 // GLTF 모델을 로드하는 함수
 function loadKirbyModel() {
    const loader = new GLTFLoader();
-   loader.load('assets/kirby/kirby_animation.glb', (gltf) => {
+   loader.load('assets/kirby/kirby.glb', (gltf) => {
       kirbyModel = gltf.scene;
       kirbyModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
       kirbyModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
@@ -182,7 +182,7 @@ function loadKirbyModel() {
 // 별탄 커비 모델 로드
 function loadKirbyStarModel() {
    const loader = new GLTFLoader();
-   loader.load('assets/img/dragonfly.glb', (gltf) => {
+   loader.load('assets/kirby/kirby_star.glb', (gltf) => {
       kirbyStarModel = gltf.scene;
       kirbyStarModel.scale.set(0.4, 0.4, 0.4);
       kirbyStarModel.position.copy(player.position);
@@ -194,16 +194,17 @@ loadKirbyStarModel();
 // 이벤트 발생 시 5초간 모델을 바꾸는 함수
 function changePlayerModel() {
    if (kirbyStarModel) {
-      // 커비 모델을 임시로 다른 모델로 교체
+      // 커비 모델 교체
       scene.remove(playerModel);
       playerModel = kirbyStarModel;
       scene.add(playerModel);
-      
+      player.isTransformed = true;
       // 5초 뒤에 원래 모델로 돌아옵니다.
       setTimeout(() => {
          scene.remove(playerModel);
-         playerModel = kirbyModel; // 가정: kirbyModel은 원래 커비 모델을 참조하는 변수입니다.
+         playerModel = kirbyModel;
          scene.add(playerModel);
+         player.isTransformed = false;
 
          
          // 원래 커비 애니메이션 클립을 재생합니다.
@@ -414,7 +415,7 @@ window.addEventListener('keydown', (event) => {
          keys.d.pressed = true
          break
       case 'Space':
-         if (!player.isJumping) { // 점프 상태가 아닐 때만 점프를 허용
+         if (!player.isJumping && !player.isTransformed) { // 점프 상태가 아닐 때만 점프를 허용
             player.velocity.y = 0.12
             player.isJumping = true; // 점프 상태로 설정
          }
@@ -635,12 +636,7 @@ function animate() {
    }
    enemies.forEach((enemy) => {
       enemy.update(ground)
-      if (
-         boxCollision({
-            box1: player,
-            box2: enemy
-         })
-      ) {
+      if (!player.isTransformed && boxCollision({ box1: player, box2: enemy })) {
          if(enemy && enemy.model) {
             if(enemy.type === 'star') {
                changePlayerModel()
