@@ -36,7 +36,7 @@ class Box extends THREE.Mesh {
       velocity = {
          x: 0,
          y: 0,
-         z: 0
+         z: 0.05
       },
       position = {
          x: 0,
@@ -78,8 +78,11 @@ class Box extends THREE.Mesh {
    update(ground) {
       this.updateSides();
 
-      if (this.zAcceleration) this.velocity.z += 0.0003;
-      backgroundSpeed += 0.00003;
+      // if (this.zAcceleration) {
+      //   this.velocity.z += 0.0003;
+      // }
+
+      this.velocity.z = backgroundSpeed;  // Set a constant velocity for z-axis
 
       this.position.x += this.velocity.x;
       this.position.z += this.velocity.z;
@@ -514,8 +517,8 @@ function animate() {
    }
 
    // 플레이어 위치 설정
-   player.velocity.x = 0
-   player.velocity.z = 0
+   player.velocity.x = 0;
+   player.velocity.z = -0.05;
 
    if (keys.a.pressed) {
       console.log(player.position.x);
@@ -528,6 +531,8 @@ function animate() {
          player.velocity.x = 0.05
       }
    }
+
+   player.position.z -= backgroundSpeed;
 
    if (playerModel) {
       player.update(ground); // 플레이어 물리적 위치 업데이트
@@ -607,7 +612,7 @@ function animate() {
 }
 
 // 점수 변수
-let score = -100;
+let score = -50;
 
 // 화면에 점수 업데이트
 function updateScore() {
@@ -620,6 +625,9 @@ function updateScore() {
 // 점수 증가
 function incrementScore() {
    score += 50
+   if (score % 100 == 0) {
+    backgroundSpeed += 0.0003;
+   }
    updateScore();
 }
 
