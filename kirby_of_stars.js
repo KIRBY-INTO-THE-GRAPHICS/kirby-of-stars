@@ -678,7 +678,7 @@ function updateScore() {
 function incrementScore() {
    score += 50
    if (score % 100 == 0) {
-    backgroundSpeed += 0.0003;
+    backgroundSpeed += 0.001;
    }
    updateScore();
 }
