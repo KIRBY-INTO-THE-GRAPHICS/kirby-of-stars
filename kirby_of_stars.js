@@ -317,6 +317,8 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
    treeModel.castShadow = true;
    treeModel.receiveShadow = true;
 
+   treeModel.type = 'tree';
+
    for (let i = 0; i < treeCount; i++) {
       const tree = treeModel.clone();
       tree.position.set(12, -1.95, -treeSpacing * i);
@@ -644,6 +646,7 @@ function animate() {
             else gameOver();
          }
       }
+
       if (enemy && enemy.model) {
          enemy.model.position.copy(enemy.position);
          // 잠자리일때 모델 rotation
@@ -654,6 +657,30 @@ function animate() {
          }
          enemy.model.position.copy(enemy.position);
       }
+
+      // 화면을 벗어난 객체 제거
+      if (enemy.position.z > 20) {
+         // console.log(`Before removal: ${enemies.length}`);
+
+         // 배열에서 제거
+         const index = enemies.indexOf(enemy);
+         enemies.splice(index, 1);
+
+         // Three.js 씬에서 제거
+         scene.remove(enemy.model); // 예상되는 모델 참조에 따라 수정
+
+         if (enemy.model && enemy.model.dispose) {
+            enemy.model.dispose(); // Three.js에서 사용한 자원을 해제
+         }         
+
+         // 모델에 대한 참조를 끊음
+         enemy.model = null; 
+         enemy = null;
+
+         // console.log(`After removal: ${enemies.length}`);
+         renderer.render(scene, camera);
+      }
+
    })
 
    frames++
@@ -681,20 +708,6 @@ function incrementScore() {
 
 // 초기 점수 설정
 updateScore();
-
-
-function removeAllObjects() {
-   for (let i = scene.children.length - 1; i >= 0; i--) {
-      const obj = scene.children[i];
-      if (obj.update) {
-         obj.update();
-      }
-      if (obj.position.z > 10) {
-         // 화면에서 벗어난 객체 모델 제거
-         scene.remove(obj);
-      }
-   }
-}
 
 const gameOverScreen = document.getElementById('game-over');
 const finalScore = document.getElementById('final-score');
