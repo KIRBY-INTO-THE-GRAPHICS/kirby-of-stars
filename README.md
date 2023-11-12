@@ -49,31 +49,31 @@
         <td align="center"><a href="https://github.com/jrary"><b>202035360 이다현</b></a></td>
         <td align="center"><a href="https://github.com/joeun-01"><b>202035386 정조은</b></a></td>
     </tr>
-        <tr>
-        <td align="center">
-          Obstacle(box and thorns) Modeling
-          Obstacle Logic
-          Add Sound Effects
+    <tr>
+        <td align="center" width="200">
+          Obstacle Modeling<br />
+          Obstacle Logic<br />
+          Add Sound Effects<br />
         </td>
-        <td align="center">
-          Obstacle(dragonfly) Modeling
-          Obstacle Logic
-          Scoring & Ending Logic
+        <td align="center" width="200">
+          Obstacle Modeling<br />
+          Obstacle Logic<br />
+          Scoring & Ending Logic<br />
         </td>
-        <td align="center">
-          Kirby Modeling
-          Main Character logic
-          Item Effect Logic
+        <td align="center" width="200">
+          Kirby Modeling<br />
+          Main Character logic<br />
+          Item Effect Logic<br />
         </td>
-        <td align="center">
-          Base settings
-          Background Modeling
-          Background Logic
+        <td align="center" width="200">
+          Base settings<br />
+          Background Modeling<br />
+          Background Logic<br />
         </td>
-        <td align="center">
-          Star Item Modeling
-          Main Character logic
-          Obstacle Logic
+        <td align="center" width="200">
+          Star Item Modeling<br />
+          Main Character logic<br />
+          Obstacle Logic<br />
         </td>
     </tr>
 </table>
