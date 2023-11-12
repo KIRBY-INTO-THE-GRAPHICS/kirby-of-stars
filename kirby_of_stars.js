@@ -114,6 +114,38 @@ class Box extends THREE.Mesh {
    }
 }
 
+// Get audio resources from html
+var bgmAudio = document.getElementById("bgmAudio");
+var jumpAudio = document.getElementById("jumpAudio");
+var starAudio = document.getElementById("starAudio");
+var gameOverAudio = document.getElementById("gameOverAudio");
+
+window.onload = function() {
+   // Request audio authorization to user
+   navigator.mediaDevices.getUserMedia({ audio: true })
+   .then(function(stream) {
+      // Play bgm
+      playSound(bgmAudio);
+   })
+   .catch(function(error) {
+       console.error('Error accessing audio:', error);
+   });
+
+   // Set up a function that runs at the end of audio
+   bgmAudio.addEventListener("ended", function() {
+       // Play audio all over again
+       bgmAudio.currentTime = 0;
+       playSound(bgmAudio);
+   });
+};
+
+// Functions to play and pause audio sound
+function playSound(audio) {
+   audio.play();
+}
+function pauseSound(audio) {
+   audio.pause();
+}
 
 // Function to add a skybox to the scene
 function addSky() {
@@ -434,7 +466,8 @@ window.addEventListener('keydown', (event) => {
          keys.d.pressed = true
          break
       case 'Space':
-         if (!player.isJumping && !player.isTransformed) { 
+         if (!player.isJumping && !player.isTransformed) {
+            playSound(jumpAudio);
             // Allowing jump only when not already jumping and not transformed
             player.velocity.y = 0.12
             player.isJumping = true; // Set with jump mode
@@ -667,7 +700,8 @@ function animate() {
       if (!player.isTransformed && boxCollision({ box1: player, box2: enemy })) {
          if(enemy && enemy.model) {
             if(enemy.type === 'star') {
-               changePlayerModel()
+               changePlayerModel();
+               playSound(starAudio);
             }
             else gameOver();
          }
@@ -745,6 +779,10 @@ restartButton.addEventListener('click', () => {
 
 function gameOver() {
   cancelAnimationFrame(animationId);
+
+  // Set audios
+  pauseSound(bgmAudio);
+  playSound(gameOverAudio);
 
   // Show the game over screen
   gameOverScreen.style.display = 'block';
