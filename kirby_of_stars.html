@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Kirby of Stars</title>
+      <style>
+          body {
+              margin: 0;
+              background: #0c4a6e;
+          }
+      </style>
+  </head>
+  <body>
+    <audio id="bgmAudio" style="display: none;" autoplay>
+      <source src="assets/audio/game-BGM.mp3" type="audio/mp3">
+      Your browser does not support the audio tag.
+    </audio>
+    <audio id="jumpAudio" style="display: none;">
+      <source src="assets/audio/kirby-jump.wav" type="audio/wav">
+      Your browser does not support the audio tag.
+    </audio>
+    <audio id="starAudio" style="display: none;">
+      <source src="assets/audio/kirby-star.mp3" type="audio/mp3">
+      Your browser does not support the audio tag.
+    </audio>
+    <audio id="gameOverAudio" style="display: none;">
+      <source src="assets/audio/game-over.wav" type="audio/wav">
+      Your browser does not support the audio tag.
+    </audio>
+    <div id="score" style="position: absolute; bottom: 10px; right: 20px; color: white; font-size: 24px;">Score: 0</div>
+    <div id="game-over" style="position: absolute; top: 0%; left: 0%; width: 100%; height: 100%; align-items: center;text-align: center; color: white; background-color: rgba(0, 0, 0, 0.7); display: none;">
+      <h1>Game Over</h1>
+      <h3>Your Score: <span id="final-score">0</span></h3>
+      <button id="restart-button">Restart</button>
+    </div>
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="kirby_of_stars.js"></script>
+  </body>
+</html>
