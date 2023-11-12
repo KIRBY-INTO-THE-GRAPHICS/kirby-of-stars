@@ -51,12 +51,12 @@
     </tr>
     <tr>
         <td align="center" width="200">
-          Obstacle Modeling<br />
+          Obstacle(box, thorns) Modeling<br />
           Obstacle Logic<br />
           Add Sound Effects<br />
         </td>
         <td align="center" width="200">
-          Obstacle Modeling<br />
+          Obstacle(dragonfly) Modeling<br />
           Obstacle Logic<br />
           Scoring & Ending Logic<br />
         </td>
