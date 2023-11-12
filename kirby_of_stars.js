@@ -1,12 +1,14 @@
+// Importing necessary modules from the Three.js library
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// Creating a Three.js scene
 const scene = new THREE.Scene()
 const clock = new THREE.Clock()
 let backgroundSpeed = 0.05;
 
-// 카메라 세팅
+// Setting up the camera
 const camera = new THREE.PerspectiveCamera(
    75,
    window.innerWidth / window.innerHeight,
@@ -15,6 +17,7 @@ const camera = new THREE.PerspectiveCamera(
 )
 camera.position.set(2, 5, 7)
 
+// Creating a WebGLRenderer
 const renderer = new THREE.WebGLRenderer({
    alpha: true,
    antialias: true
@@ -23,8 +26,10 @@ renderer.shadowMap.enabled = true
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
+// Adding orbit controls for easier camera manipulation
 const controls = new OrbitControls(camera, renderer.domElement)
 
+// Creating a custom class 'Box' which extends THREE.Mesh
 class Box extends THREE.Mesh {
    constructor({
       width,
@@ -45,9 +50,12 @@ class Box extends THREE.Mesh {
       },
       zAcceleration = false
    }) {
+      // Creating material for the box
       const material = new THREE.MeshStandardMaterial({ color, opacity, transparent });
+      // Calling the super constructor with BoxGeometry and the created material
       super(new THREE.BoxGeometry(width, height, depth), material);
 
+      // Setting properties of the box
       this.width = width;
       this.height = height;
       this.depth = depth;
@@ -65,6 +73,7 @@ class Box extends THREE.Mesh {
       this.updateSides();
    }
 
+   // Helper method to update the sides of the box
    updateSides() {
       this.right = this.position.x + this.width / 2;
       this.left = this.position.x - this.width / 2;
@@ -76,13 +85,12 @@ class Box extends THREE.Mesh {
       this.back = this.position.z - this.depth / 2;
    }
 
+   // Method to update the box's position and apply gravity
    update(ground) {
       this.updateSides();
-      // if (this.zAcceleration) {
-      //   this.velocity.z += 0.0003;
-      // }
 
-      this.velocity.z = backgroundSpeed;  // Set a constant velocity for z-axis
+      // Set a constant velocity for z-axis
+      this.velocity.z = backgroundSpeed;  
 
       this.position.x += this.velocity.x;
       this.position.z += this.velocity.z;
@@ -90,6 +98,7 @@ class Box extends THREE.Mesh {
       this.applyGravity(ground);
    }
 
+   // Method to apply gravity to the box
    applyGravity(ground) {
       this.velocity.y += this.gravity;
 
@@ -106,9 +115,11 @@ class Box extends THREE.Mesh {
 }
 
 
-// 배경 - 하늘
+// Function to add a skybox to the scene
 function addSky() {
+   // Creating a cube texture loader
    var cubeTextureLoader = new THREE.CubeTextureLoader();
+   // Loading sky textures
    var aCubeMap = cubeTextureLoader.load([
       'assets/img/sky.jpg',
       'assets/img/sky.jpg',
@@ -120,9 +131,11 @@ function addSky() {
 
    aCubeMap.format = THREE.RGBAFormat;
 
+   // Creating a shader for the skybox
    var aShader = THREE.ShaderLib['cube'];
    aShader.uniforms['tCube'].value = aCubeMap;
 
+   // Creating a material for the skybox
    var aSkyBoxMaterial = new THREE.ShaderMaterial({
       fragmentShader: aShader.fragmentShader,
       vertexShader: aShader.vertexShader,
@@ -131,16 +144,20 @@ function addSky() {
       side: THREE.BackSide
    });
 
+   // Creating a mesh for the skybox
    var aSkybox = new THREE.Mesh(
       new THREE.BoxGeometry(1000000, 1000000, 1000000),
       aSkyBoxMaterial
    );
 
+   // Adding the skybox to the scene
    scene.add(aSkybox);
 }
 
+// Calling the addSky function to add the skybox to the scene
 addSky();
 
+// Function to check collision between two boxes
 function boxCollision({ box1, box2 }) {
    const xCollision = box1.right >= box2.left && box1.left <= box2.right
    const yCollision =
@@ -150,36 +167,38 @@ function boxCollision({ box1, box2 }) {
    return xCollision && yCollision && zCollision
 }
 
-// 플레이어(커비)
+// Loading the Kirby model
 let playerModel
 let kirbyModel
 let mixer
 let kirbyStarModel
-// GLTF 모델을 로드하는 함수
+
+// Function to load the Kirby model
 function loadKirbyModel() {
    const loader = new GLTFLoader();
    loader.load('assets/kirby/kirby.glb', (gltf) => {
       kirbyModel = gltf.scene;
-      kirbyModel.scale.set(0.4, 0.4, 0.4); // 모델의 크기
-      kirbyModel.position.copy(player.position); // Box 객체의 초기 위치를 가져옴
+      kirbyModel.scale.set(0.4, 0.4, 0.4); // Scaling the model
+      kirbyModel.position.copy(player.position); // Setting the initial position
       kirbyModel.castShadow = true;
       playerModel = kirbyModel
 
       scene.add(playerModel);
 
-      // AnimationMixer를 생성합니다.
+      // Creating an AnimationMixer
       mixer = new THREE.AnimationMixer(playerModel);
 
-      // 모든 애니메이션 클립을 재생합니다.
+      // Playing all animation clips
       gltf.animations.forEach((clip) => {
          mixer.clipAction(clip).play();
       });
 
-      animate(); // 모델 로드 후 애니메이션 시작
+      animate(); // Starting animation after loading the model
       
    });
 }
-// 별탄 커비 모델 로드
+
+// Function to load the Kirby Star model
 function loadKirbyStarModel() {
    const loader = new GLTFLoader();
    loader.load('assets/kirby/kirby_star.glb', (gltf) => {
@@ -191,34 +210,33 @@ function loadKirbyStarModel() {
 }
 loadKirbyStarModel();
 
-// 이벤트 발생 시 5초간 모델을 바꾸는 함수
+// Function to change the player model after 5 seconds
 function changePlayerModel() {
    if (kirbyStarModel) {
-      // 커비 모델 교체
+      // Changing the Kirby model
       scene.remove(playerModel);
       playerModel = kirbyStarModel;
       scene.add(playerModel);
       player.isTransformed = true;
-      // 5초 뒤에 원래 모델로 돌아옵니다.
+      
+       // Returning to the original model after 5 seconds
       setTimeout(() => {
          scene.remove(playerModel);
          playerModel = kirbyModel;
          scene.add(playerModel);
          player.isTransformed = false;
 
-         
-         // 원래 커비 애니메이션 클립을 재생합니다.
-         gltf.animations.forEach((clip) => {
-            mixer.clipAction(clip).play();
-         });
+      // Playing the original Kirby animation clips
+      gltf.animations.forEach((clip) => {
+         mixer.clipAction(clip).play();
+      });
 
-         animate(); // 모델 로드 후 애니메이션 시작
-
+      animate(); // Starting animation after loading the model
       }, 5000);
    }
 }
 
-
+// Creating a player object using the Box class
 const player = new Box({
    width: 1,
    height: 1,
@@ -232,10 +250,11 @@ const player = new Box({
       z: 0
    }
 });
+
+// Loading the Kirby model
 loadKirbyModel();
 
-// 배경 - 바닥
-// 기본 바닥(중력을 위한)
+// Creating the ground object
 const ground = new Box({
    width: 100,
    height: 0,
@@ -250,9 +269,10 @@ const ground = new Box({
 ground.receiveShadow = true
 scene.add(ground)
 
+// Creating a GLTFLoader
 const gltfLoader = new GLTFLoader();
 
-// 배경 - 잔디
+// Creating grass objects
 const grassCount = 11;
 const grassSpacing = 5;
 let grassArray = [];
@@ -272,7 +292,6 @@ gltfLoader.load('assets/img/grassground.glb', (gltf) => {
    animate()
    
 });
-
 gltfLoader.load('assets/img/grassground.glb', (gltf) => {
    const grassModel = gltf.scene;
    grassModel.scale.set(0.03, 0.01, 0.05);
@@ -289,7 +308,7 @@ gltfLoader.load('assets/img/grassground.glb', (gltf) => {
    
 });
 
-// 배경 - 나무
+// Creating tree objects
 const treeCount = 3;
 const treeSpacing = 20;
 let treeArray = [];
@@ -310,7 +329,6 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
    
 
 });
-
 gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
    const treeModel = gltf.scene;
    treeModel.scale.set(0.1, 0.1, 0.1);
@@ -329,7 +347,7 @@ gltfLoader.load('assets/img/fantasy_tree.glb', (gltf) => {
    
 });
 
-// 배경 - 꽃
+// Creating flower objects
 const flowerCount = 11;
 const flowerSpacing = 5;
 let flowerArray = [];
@@ -348,7 +366,6 @@ gltfLoader.load('assets/img/flower2.glb', (gltf) => {
    }
    animate();
 });
-
 gltfLoader.load('assets/img/flower2.glb', (gltf) => {
    const flowerModel = gltf.scene;
    flowerModel.scale.set(0.15, 0.15, 0.15);
@@ -365,7 +382,7 @@ gltfLoader.load('assets/img/flower2.glb', (gltf) => {
    
 });
 
-// 배경 - 구름
+// Creating cloud objects
 const cloudCount = 5;
 const cloudSpacing = 10;
 let cloudArray = [];
@@ -385,7 +402,7 @@ gltfLoader.load('assets/img/cloud.glb', (gltf) => {
    
 });
 
-// 조명
+// Light
 const light = new THREE.DirectionalLight(0xffffff, 1.0)
 light.position.y = 3
 light.position.z = 1
@@ -398,7 +415,7 @@ camera.position.z = 5
 console.log(ground.top)
 console.log(player.bottom)
 
-// 조작 키 설정
+// Setting up event listeners for keyboard input
 const keys = {
    a: {
       pressed: false
@@ -417,9 +434,10 @@ window.addEventListener('keydown', (event) => {
          keys.d.pressed = true
          break
       case 'Space':
-         if (!player.isJumping && !player.isTransformed) { // 점프 상태가 아닐 때만 점프를 허용
+         if (!player.isJumping && !player.isTransformed) { 
+            // Allowing jump only when not already jumping and not transformed
             player.velocity.y = 0.12
-            player.isJumping = true; // 점프 상태로 설정
+            player.isJumping = true; // Set with jump mode
          }
          break
    }
@@ -439,21 +457,21 @@ window.addEventListener('keyup', (event) => {
 var animationId;
 
 const enemies = []
-// 잠자리 모델을 로드하는 함수
+// Load dragonfly objects
 function loadDragonflyModel(enemy) {
    const loader = new GLTFLoader();
    loader.load('assets/obstacle/dragonfly.glb', (gltf) => {
       const dragonflyModel = gltf.scene;
-      dragonflyModel.scale.set(0.3, 0.3, 0.3); // 모델의 크기를 조정합니다.
-      dragonflyModel.position.copy(enemy.position); // Box 객체의 초기 위치를 가져옴
+      dragonflyModel.scale.set(0.3, 0.3, 0.3); // Model size
+      dragonflyModel.position.copy(enemy.position); // get the position of the box object
       dragonflyModel.castShadow = true;
       scene.add(dragonflyModel);
 
-      enemy.model = dragonflyModel; // Box 객체에 모델을 연결합니다.
-      enemy.type = 'dragonfly'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+      enemy.model = dragonflyModel; // Connect the object with the box object
+      enemy.type = 'dragonfly'; // Obstacle Type -> To distinguish which obstacle is
    });
 }
-// 별 아이템 모델을 로드하는 함수
+// Load star objects
 function loadStarModel(item) {
    const loader = new GLTFLoader();
    loader.load('assets/img/star.glb', (gltf) => {
@@ -463,11 +481,11 @@ function loadStarModel(item) {
       starModel.castShadow = true;
       scene.add(starModel);
 
-      item.model = starModel; // Box 객체에 모델을 연결합니다.
-      item.type = 'star'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+      item.model = starModel; // Connect the object with the box object
+      item.type = 'star'; // Obstacle Type -> To distinguish which obstacle is
    });
 }
-// 박스 모델을 로드하는 함수
+// Load box object
 function loadBoxModel(enemy) {
    const loader = new GLTFLoader();
    loader.load('assets/obstacle/box.glb', (gltf) => {
@@ -477,12 +495,12 @@ function loadBoxModel(enemy) {
       boxModel.castShadow = true;
       scene.add(boxModel);
 
-      enemy.model = boxModel; // Box 객체에 모델을 연결합니다.
-      enemy.type = 'box'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+      enemy.model = boxModel; // Connect the object with the box object
+      enemy.type = 'box'; // Obstacle Type -> To distinguish which obstacle is
    });
 }
 
-// 가시 모델을 로드하는 함수
+// Load thorn model
 function loadThornModel(enemy) {
    const loader = new GLTFLoader();
    loader.load('assets/obstacle/obstacle_thorn.glb', (gltf) => {
@@ -494,24 +512,28 @@ function loadThornModel(enemy) {
       thornModel.castShadow = true;
       scene.add(thornModel);
 
-      enemy.model = thornModel; // Box 객체에 모델을 연결합니다.
-      enemy.type = 'box'; // 장애물 타입 -> 이걸로 어떤 장애물인지 구별
+      enemy.model = thornModel; // Connect the object with the box object
+      enemy.type = 'box'; // Obstacle Type -> To distinguish which obstacle is
    });
 }
 
-// 애니메이션 설정 부분
+// Set the animation
 let frames = 0
 let spawnRate = 150
+// Function to handle animation
 function animate() {
-  animationId = requestAnimationFrame(animate)
-  renderer.render(scene, camera)
-   // 배경 객체들 움직이게 하는 애니메이션
-   //grass
-   // 객체를 뒤로 이동
+   // Use requestAnimationFrame for smooth animation loop
+   animationId = requestAnimationFrame(animate);
+   // Render the scene using Three.js renderer
+   renderer.render(scene, camera);
+ 
+   // Animation for moving background objects
+   // Update the position of each object and reset to the initial position if it goes off-screen
+   // Grass
    for (let i = 0; i < grassArray.length; i++) {
       const grass = grassArray[i];
       grass.position.z += backgroundSpeed;
-      // 화면 밖으로 나가면 초기 위치로 이동
+      // Move to the initial position when it leave the screen
       if (grass.position.z > grassSpacing) {
          grass.position.z = -grassSpacing * (grassArray.length - 1);
       }
@@ -563,39 +585,41 @@ function animate() {
       }
    }
 
-   // 플레이어 위치 설정
-   player.velocity.x = 0;
-   player.velocity.z = -0.05;
+  // Set player's velocity
+  player.velocity.x = 0;
+  player.velocity.z = -0.05;
 
+  // Adjust player's velocity based on keyboard input
    if (keys.a.pressed) {
-      // console.log(player.position.x);
       if(player.position.x - 0.05 > - 3) {
          player.velocity.x = -0.05
       }
    } else if (keys.d.pressed) {
-      // console.log(player.position.x);
       if(player.position.x + 0.05 < 5) {
          player.velocity.x = 0.05
       }
    }
 
-   player.position.z -= backgroundSpeed;
+  // Update player's z position
+  player.position.z -= backgroundSpeed;
 
+  // Update player model if it exists
    if (playerModel) {
-      player.update(ground); // 플레이어 물리적 위치 업데이트
-      playerModel.position.copy(player.position); // 커비 모델 위치를 player 위치와 동기화
+      player.update(ground); // Update player physical location
+      playerModel.position.copy(player.position); // Synchronize Kirby model location with player location
       playerModel.rotation.y = Math.PI;
 
-      // 커비 뛰는 애니메이션 적용
+      // Apply Kirby's jumping animation
       const delta = clock.getDelta();
       if (mixer) mixer.update(delta);
    }
 
 
-   // 장애물 생성
+   // Spawn obstacles at regular intervals
    if (frames % spawnRate === 0) {
       if (spawnRate > 40) spawnRate -= 0.5
 
+      // Create obstacles
       const enemy = new Box({
          width: 1,
          height: 1,
@@ -618,6 +642,7 @@ function animate() {
       scene.add(enemy)
       enemies.push(enemy)
 
+      // Randomly load obstacle models
       const rand = Math.random();
       if (rand < 0.05) {
          loadStarModel(enemy);
@@ -634,8 +659,9 @@ function animate() {
          loadBoxModel(enemy);
          incrementScore()
       }
-      
    }
+
+   // Update and check collisions for obstacles
    enemies.forEach((enemy) => {
       enemy.update(ground)
       if (!player.isTransformed && boxCollision({ box1: player, box2: enemy })) {
@@ -647,9 +673,11 @@ function animate() {
          }
       }
 
+      // Update model position if it exists
       if (enemy && enemy.model) {
          enemy.model.position.copy(enemy.position);
-         // 잠자리일때 모델 rotation
+
+         // Adjust model rotation and position for dragonfly
          if (enemy.model && enemy.type === 'dragonfly') {
             enemy.model.rotation.y = -10.3;
             enemy.gravity = -10;
@@ -658,38 +686,36 @@ function animate() {
          enemy.model.position.copy(enemy.position);
       }
 
-      // 화면을 벗어난 객체 제거
+      // Remove objects that are off-screen
       if (enemy.position.z > 20) {
-         // console.log(`Before removal: ${enemies.length}`);
 
-         // 배열에서 제거
+         // Renove from the array
          const index = enemies.indexOf(enemy);
          enemies.splice(index, 1);
 
-         // Three.js 씬에서 제거
-         scene.remove(enemy.model); // 예상되는 모델 참조에 따라 수정
+         // Remove from the scene
+         scene.remove(enemy.model); // Modify based on expected model references
 
          if (enemy.model && enemy.model.dispose) {
-            enemy.model.dispose(); // Three.js에서 사용한 자원을 해제
+            enemy.model.dispose(); // Release resources used by Three.js
          }         
 
-         // 모델에 대한 참조를 끊음
+         // Disconnect reference to model
          enemy.model = null; 
          enemy = null;
 
-         // console.log(`After removal: ${enemies.length}`);
          renderer.render(scene, camera);
       }
-
    })
 
+   // Increment frame count
    frames++
 }
 
-// 점수 변수
+// Score
 let score = -50;
 
-// 화면에 점수 업데이트
+// Update score int he screen
 function updateScore() {
    const scoreElement = document.getElementById("score");
    if (scoreElement) {
@@ -697,7 +723,7 @@ function updateScore() {
    }
 }
 
-// 점수 증가
+// Increasing the score
 function incrementScore() {
    score += 50
    if (score % 100 == 0) {
@@ -706,7 +732,7 @@ function incrementScore() {
    updateScore();
 }
 
-// 초기 점수 설정
+// Initial Score Settings
 updateScore();
 
 const gameOverScreen = document.getElementById('game-over');
