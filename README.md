@@ -48,11 +48,11 @@
 
 <table align="center">
     <tr>
-        <td align="center"><img width="220" height="150" alt="dyeon999" src="https://avatars.githubusercontent.com/dyeon999"><a href="https://github.com/dyeon999"><b>202035309 김도연</b></a></td>
+        <td align="center"><img width="220" alt="dyeon999" src="https://avatars.githubusercontent.com/dyeon999"><a href="https://github.com/dyeon999"><b>202035309 김도연</b></a></td>
         <td align="center"><img width="220" alt="EunsuSeo01" src="https://avatars.githubusercontent.com/EunsuSeo01"><a href="https://github.com/EunsuSeo01"><b>202035340 서은수</b></a></td>
-        <td align="center"><img width="220" height="150" alt="edv-Shin" src="https://avatars.githubusercontent.com/edv-Shin"><a href="https://github.com/edv-Shin"><b>202035344 신동원</b></a></td>
-        <td align="center"><img width="220" height="150" alt="jrary" src="https://avatars.githubusercontent.com/jrary"><a href="https://github.com/jrary"><b>202035360 이다현</b></a></td>
-        <td align="center"><img width="220" height="150" alt="joeun-01" src="https://avatars.githubusercontent.com/joeun-01"><a href="https://github.com/joeun-01"><b>202035386 정조은</b></a></td>
+        <td align="center"><img width="220" alt="edv-Shin" src="https://avatars.githubusercontent.com/edv-Shin"><a href="https://github.com/edv-Shin"><b>202035344 신동원</b></a></td>
+        <td align="center"><img width="220" alt="jrary" src="https://avatars.githubusercontent.com/jrary"><a href="https://github.com/jrary"><b>202035360 이다현</b></a></td>
+        <td align="center"><img width="220" alt="joeun-01" src="https://avatars.githubusercontent.com/joeun-01"><a href="https://github.com/joeun-01"><b>202035386 정조은</b></a></td>
     </tr>
     <tr>
         <td align="center" width="200">
